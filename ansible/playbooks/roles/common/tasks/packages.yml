@@ -27,6 +27,7 @@
   - tmux
   - bash-completion
   - dstat
+  - nc
   when: is_centos
 
 - name: install misc auxiliary packages (Ubuntu)
