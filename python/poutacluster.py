@@ -196,7 +196,7 @@ class Cluster(object):
             self.__prov_log('create', 'server-group', sg_id, self.name)
 
     def __provision_frontend(self):
-        fe_name = self.name + '-fe'
+        fe_name = self.name + '-tron'
 
         if self.frontend:
             print '    %s already provisioned' % fe_name
@@ -276,7 +276,7 @@ class Cluster(object):
         vms = self.nova_client.servers.list()
         all_vols = self.cinder_client.volumes.list()
 
-        fe_name = '%s-fe' % self.name
+        fe_name = '%s-tron' % self.name
         existing_nodes = filter(lambda lx: lx.name == fe_name, vms)
         if len(existing_nodes) > 1:
             raise RuntimeError('More than one frontend VM with the name %s found, unable to continue' % fe_name)
