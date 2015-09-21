@@ -213,6 +213,49 @@ class Cluster(object):
         if 'volumes' in self.config['frontend']:
             self.__provision_volumes(self.frontend, self.config['frontend']['volumes'])
 
+
+    def __provision_nodes_add(self, num_nodes):
+        node_base = self.name + '-node'
+        new_nodes = []
+        noldnodes = len(self.nodes)
+
+        # asynchronous part
+        for i in range(1, len(self.nodes) + num_nodes + 1):
+            node_name = '%s%02d' % (node_base, i)
+            node = None
+            for n in self.nodes:
+                if n.name == node_name:
+                    node = n
+            if node:
+                print '    %s already provisioned' % node_name
+            else:
+                node = self.__provision_vm(node_name, [self.name + '-int'],
+                                           self.config['node'],
+                                           self.config['cluster']['network'],
+                                           server_group_name=self.name)
+                self.nodes.append(node)
+                new_nodes.append(node)
+                oaw.wait_for_state(self.nova_client, 'servers', node.id, 'BUILD|ACTIVE')
+
+            print
+
+        # synchronous part after nodes are active
+        # indexed access because we'll replace the node instances with updated versions
+        for i in range(0, len(new_nodes)):
+            node = new_nodes[i]
+            print '    setup network and volumes for %s' % node.name
+            oaw.wait_for_state(self.nova_client, 'servers', node.id, 'ACTIVE')
+            # reload information after instance has reached active state
+            node = oaw.get_instance(self.nova_client, node.id)
+            new_nodes[i] = node
+            self.nodes[noldnodes+i] = node
+            self.__provision_vm_addresses(node, self.config['node'])
+            self.__provision_volumes(node, self.config['node']['volumes'])
+            print
+
+        return new_nodes
+
+
     def __provision_nodes(self, num_nodes):
         node_base = self.name + '-node'
 
@@ -340,6 +383,25 @@ class Cluster(object):
                     print "    %s" % vol.display_name
                     oaw.wait_for_state(self.cinder_client, 'volumes', vol.id, 'in-use')
                     print
+
+
+    def add(self, num_nodes):
+        print
+        print "Provisioning %d cluster nodes" % num_nodes
+        new_nodes = self.__provision_nodes_add(num_nodes)
+
+        print
+        print "Checking volume attach state"
+        for node in new_nodes:
+            for vol in self.volumes:
+                if not vol.display_name.startswith(node.name + '/'):
+                    continue
+                print "    %s" % vol.display_name
+                oaw.wait_for_state(self.cinder_client, 'volumes', vol.id, 'in-use')
+                print
+
+        return new_nodes
+
 
     def down(self, clean_shutdown=True):
         # take nodes down in reverse order
@@ -594,16 +656,21 @@ def update_ansible_inventory(cluster):
     print
 
 
-def check_connectivity():
+def check_connectivity(hosts=[]):
+    if hosts:
+        hostpattern=';'.join(hosts)
+    else:
+        hostpattern="'*'"
+
 #    cmd = "ansible -o --sudo -i ansible-hosts '*' -a 'uname -a' -f %d" % NUM_PARALLEL_ANSIBLE_TASKS
     cmd = \
-        "ansible -o -i ansible-hosts '*' -c local -m wait_for " \
+        "ansible -o -i ansible-hosts %s -c local -m wait_for " \
         " -a '" \
         " port=22" \
         " host=\"{{ ansible_ssh_host | default(inventory_hostname) }}\"" \
         " search_regex=OpenSSH " \
         " timeout=120" \
-        "'"
+        "'" % hostpattern
     cmd += ' -f %d' % NUM_PARALLEL_ANSIBLE_TASKS
 
     if os.path.isfile('key.priv'):
@@ -624,10 +691,12 @@ def run_main_playbook():
         raise RuntimeError('Ansible exited with error code: %d' % res)
 
 
-def run_bootstrap():
+def run_bootstrap(hosts=[]):
     cmd = "ansible-playbook ../ansible/playbooks/bootstrap.yml -i ansible-hosts -f %d" % NUM_PARALLEL_ANSIBLE_TASKS
     if os.path.isfile('key.priv'):
         cmd += ' --private-key key.priv'
+    if hosts:
+        cmd += " --limit=%s" % ";".join(hosts)
     print cmd
     res = subprocess.call(shlex.split(cmd))
     if res:
@@ -659,16 +728,16 @@ def run_configuration():
     run_main_playbook()
 
 
-def run_first_time_setup():
+def run_first_time_setup(hosts=[]):
     print
     print "First we'll check the connectivity to the cluster"
     print
-    check_connectivity()
+    check_connectivity(hosts)
     print
     print "When all hosts are up, proceed with some bootstrap actions followed by a reboot if necessary"
     print "(this may take a while)"
     print
-    run_bootstrap()
+    run_bootstrap(hosts)
 
     print "Sleeping for a while before starting polling the hosts after the bootstrap"
     time.sleep(3)
@@ -722,6 +791,9 @@ def main():
 
     subparsers.add_parser('up').add_argument(
         'num_nodes', metavar='num_nodes', type=int, help='number of nodes')
+
+    subparsers.add_parser('add').add_argument(
+        'num_nodes', metavar='num nodes', type=int, help='number of nodes to add')
 
     subparsers.add_parser('add_key').add_argument(
         'key_file', metavar='key_file', type=str, help='public key to upload')
@@ -789,6 +861,34 @@ def main():
         # refresh cluster state so that all provisioned aspects like floating IP addresses are present
         cluster.refresh_state()
         print_usage_instructions(cluster)
+
+    # Add nodes to the cluster
+    elif command == 'add':
+        if not cluster.frontend:
+            print "No cluster is running"
+            sys.exit(1)
+
+        if not args.num_nodes:
+            print
+            print "ERROR: 'add' requires number of nodes as an argument"
+            print
+            sys.exit(1)
+        
+        new_nodes = cluster.add(args.num_nodes)
+        update_ansible_inventory(cluster)
+        #update_ansible_inventory(cluster, "ansible-newnodes", new_nodes)
+        print "Nodes has been started and resources provisioned."
+        print "Next we'll use 'ansible' to install and configure software"
+
+        # wait for a while for the last nodes to boot
+        time.sleep(5)
+
+        hosts = [str(n.name) for n in new_nodes]
+        run_first_time_setup(hosts)
+
+        # refresh cluster state so that all provisioned aspects like floating IP addresses are present
+        cluster.refresh_state()
+
 
     # bring cluster down
     elif command == 'down':
