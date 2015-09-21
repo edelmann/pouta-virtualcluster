@@ -31,3 +31,18 @@
     - include: common/handlers/main.yml
     - include: gridengine/handlers/main.yml
 
+- name: Config GridEngine
+  hosts: ge_master
+  become: yes
+  environment:
+    SGE_ROOT: /usr/share/gridengine
+  tasks:
+
+  - name: Set some ALICE friendly values for the queue all.q
+    command: qconf -mattr queue {{ item.var }} {{ item.val }} all.q
+    with_items:
+      - { var: 'h_rt', val: '172800' }
+      - { var: 'h_vmem', val: '6294967296' }
+      - { var: 'shell', val: '/bin/bash' }
+      - { var: 'tmpdir', val: '/mnt/tmp' }
+
