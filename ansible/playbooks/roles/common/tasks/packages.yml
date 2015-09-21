@@ -18,6 +18,9 @@
 - name: configure and start acpid service
   service: name=acpid state=started enabled=true
 
+- name: Set up NTP
+  service: name=ntpd enabled=yes state=started
+
 - name: install misc auxiliary packages (CentOS)
   yum: name="{{ item }}" state=present
   with_items:
