@@ -6,7 +6,7 @@
   tasks:
 
   - name: Set the FQDN
-    command: hostname alice-tron.hip.fi
+    command: hostname {{inventory_hostname}}.hip.fi
 
 
 - name: Some generic stuff
@@ -14,8 +14,8 @@
   become: yes
   tasks:
 
-  - name: Add alice-tron.hip.fi to /etc/hosts
-    replace: regexp="^([0-9.]* alice-tron)$" replace="\1 alice-tron.hip.fi" dest=/etc/hosts
+  - name: Add frontend FQDN to /etc/hosts
+    replace: regexp="^([0-9.]* {{groups['frontend'][0]}})$" replace="\1 {{groups['frontend'][0]}}.hip.fi" dest=/etc/hosts
 
   - name: Install the HEP_OSlibs
     yum: name=http://linuxsoft.cern.ch/wlcg/sl6/x86_64/HEP_OSlibs_SL6-1.0.16-0.el6.x86_64.rpm
