@@ -24,6 +24,13 @@
   - name: Install the HEP_OSlibs
     yum: name=http://linuxsoft.cern.ch/wlcg/sl6/x86_64/HEP_OSlibs_SL6-1.0.16-0.el6.x86_64.rpm
    
+  - name: Set timezone
+    file:
+      path=/etc/localtime
+      src=/usr/share/zoneinfo/Europe/Helsinki
+      state=link
+      force=yes
+
 
 
 - name: Create the aliprod user on FE and nodes
