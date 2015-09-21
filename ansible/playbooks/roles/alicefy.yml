@@ -44,8 +44,8 @@
     become: yes
     become_user: aliprod
 
-  - name: Create dir for aliprod in /shared_data
-    file: dest=/shared_data/aliprod state=directory owner=aliprod
+  - name: Create dir for aliprod in /mnt/shared_data
+    file: dest=/mnt/shared_data/aliprod state=directory owner=aliprod
     become: yes
 
   - name: Create a tmpdir
