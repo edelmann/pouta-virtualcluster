@@ -1,0 +1,124 @@
+---
+
+- name: Some generic FE stuff
+  hosts: cluster_master
+  become: yes
+  tasks:
+
+  - name: Set the FQDN
+    command: hostname alice-tron.hip.fi
+
+
+- name: Some generic stuff
+  hosts: all
+  become: yes
+  tasks:
+
+  - name: Add alice-tron.hip.fi to /etc/hosts
+    replace: regexp="^([0-9.]* alice-tron)$" replace="\1 alice-tron.hip.fi" dest=/etc/hosts
+
+  - name: Install the HEP_OSlibs
+    yum: name=http://linuxsoft.cern.ch/wlcg/sl6/x86_64/HEP_OSlibs_SL6-1.0.16-0.el6.x86_64.rpm
+   
+
+
+- name: Create the aliprod user on FE and nodes
+  hosts: all
+  tasks:
+
+  - name: Create the aliprod user
+    user: name=aliprod home=/mnt/local_data/aliprod
+    become: yes
+
+  - name: Create the ssh dir.
+    file: dest=~aliprod/.ssh/ mode=700 state=directory
+    become: yes
+    become_user: aliprod
+
+  - name: Copy public ssh key
+    copy: src=~/.ssh/id_rsa.pub  dest=~aliprod/.ssh/authorized_keys mode=600
+    become: yes
+    become_user: aliprod
+
+  - name: Create dir for aliprod in /shared_data
+    file: dest=/shared_data/aliprod state=directory owner=aliprod
+    become: yes
+
+  - name: Create a tmpdir
+    file: dest=/mnt/tmp state=directory mode=777
+    become: yes
+
+  - name: Create a .libnetrc
+    copy: src=alicefiles/libnetrc dest=~aliprod/.libnetrc
+    become: yes
+    become_user: aliprod
+
+    
+
+- name: Configure the AliEn services
+  hosts: cluster_master
+  become: yes
+  become_user: aliprod
+  tasks:
+
+  - name: Create the ~aliprod/.alien dir tree
+    file: dest=~aliprod/.alien/etc/aliend/ALICE state=directory
+
+  - name: Copy the aliend-startup.conf file
+    lineinfile: dest=~aliprod/.alien/etc/aliend/startup.conf line="ALIEN_ORGANISATIONS=ALICE" create=yes
+
+  - name: Copy the ALICE-startup.conf file
+    lineinfile: dest=~aliprod/.alien/etc/aliend/ALICE/startup.conf line={{ item }} create=yes
+    with_items:
+    - 'AliEnUser=aliprod'
+    - 'AliEnServices="Monitor CMreport CE MonaLisa"'
+
+  - name: Set the ALIEN_DOMAIN env. var.
+    lineinfile: line="export ALIEN_DOMAIN=hip-fi" dest=~aliprod/.alien/Environment state=present create=yes
+
+  - name: Create the .globus dir
+    file: dest=~aliprod/.globus state=directory mode=700
+
+  - name: Copy the certificate
+    copy: src=~/.globus//{{ item.file }} dest=~aliprod/.globus/{{ item.file }} mode={{ item.mode }}
+    with_items:
+    - { file: userkey.pem, mode: 600 }
+    - { file: usercert.pem, mode: 644 }
+
+  - name: Make symlink to .globus
+    file: src=~aliprod/.globus dest=~aliprod/.alien/globus state=link
+
+  - name: Set PATH for aliprod
+    lineinfile: line="export PATH=$HOME/bin:$PATH:/cvmfs/alice.cern.ch/bin/"  dest=~aliprod/.bashrc  state=present
+
+  - name: Set TMPDIR
+    lineinfile: line="export TMPDIR=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
+
+
+- name:  Install and set up CVMFS
+  hosts: cvmfs
+  become : yes
+  environment:
+    http_proxy: "http://192.168.82.36:3128"
+  tasks:
+
+  - name: Add the CERNVM repo
+    copy: src=alicefiles/cernvm.repo dest=/etc/yum.repos.d/cernvm.repo 
+
+  - name: Import the GPG key of the repo
+    get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/RPM-GPG-KEY-CernVM  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-CernVM
+
+  - name: Install CVMFS
+    yum: name="{{ item }}" state=present
+    with_items:
+    - cvmfs
+    - cvmfs-init-scripts
+
+  - name: Configure CVMFS
+    copy: src=alicefiles/cvmfs-default.local dest=/etc/cvmfs/default.local 
+
+  - name: Run cvmfs_config setup
+    command: cvmfs_config setup
+
+  - name: Start autofs
+    service: name=autofs state=started enabled=yes

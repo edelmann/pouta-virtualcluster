@@ -12,6 +12,9 @@
 # common setup for master - slave
 - include: roles/cluster.yml
 
+# ALICE stuff (has be done before the gridengine stuff)
+- include: roles/alicefy.yml
+
 # ganglia for monitoring
 - include: roles/ganglia.yml
 
