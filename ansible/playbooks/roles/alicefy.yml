@@ -8,6 +8,9 @@
   - name: Set the FQDN
     command: hostname {{inventory_hostname}}.hip.fi
 
+  - name: Add a qstatsummary command
+    copy: src=alicefiles/qstatsummary dest=/usr/local/bin/qstatsummary mode=755
+
 
 - name: Some generic stuff
   hosts: all
