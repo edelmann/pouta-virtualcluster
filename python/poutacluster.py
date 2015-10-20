@@ -220,7 +220,9 @@ class Cluster(object):
         noldnodes = len(self.nodes)
 
         # asynchronous part
-        for i in range(1, len(self.nodes) + num_nodes + 1):
+        nnew = 0
+        i = 1
+        while nnew < num_nodes:
             node_name = '%s%02d' % (node_base, i)
             node = None
             for n in self.nodes:
@@ -236,6 +238,8 @@ class Cluster(object):
                 self.nodes.append(node)
                 new_nodes.append(node)
                 oaw.wait_for_state(self.nova_client, 'servers', node.id, 'BUILD|ACTIVE')
+                nnew += 1
+            i += 1
 
             print
 
