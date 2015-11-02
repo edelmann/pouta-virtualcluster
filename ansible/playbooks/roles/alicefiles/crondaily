@@ -1,4 +1,4 @@
 #!/bin/bash
 
-find /mnt/local_data/aliprod/ -type f  -atime +3 -exec rm -rf {} \;
+find /mnt/aliprod/ -type f  -atime +3 -exec rm -rf {} \;
 find /mnt/tmp/ -type f  -atime +3 -exec rm -rf {} \;

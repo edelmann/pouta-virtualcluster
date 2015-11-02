@@ -56,7 +56,7 @@
   tasks:
 
   - name: Create the aliprod user
-    user: name=aliprod home=/mnt/local_data/aliprod
+    user: name=aliprod home=/mnt/aliprod
     become: yes
 
   - name: Create the ssh dir.
