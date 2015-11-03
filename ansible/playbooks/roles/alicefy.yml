@@ -127,14 +127,18 @@
 - name:  Install and set up CVMFS
   hosts: cvmfs
   become : yes
-  environment:
-    http_proxy: "http://192.168.82.36:3128"
   tasks:
+
+  - name: get local ip
+    local_action: shell ifconfig -a eth0 | awk '/inet addr:/{sub(".*:", "", $2); print $2}'
+    register: local_ip
 
   - name: Add the CERNVM repo
     copy: src=alicefiles/cernvm.repo dest=/etc/yum.repos.d/cernvm.repo 
 
   - name: Import the GPG key of the repo
+    environment:
+      http_proxy: "http://{{ local_ip.stdout }}:3128" 
     get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/RPM-GPG-KEY-CernVM  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-CernVM
 
   - name: Install CVMFS
@@ -144,7 +148,7 @@
     - cvmfs-init-scripts
 
   - name: Configure CVMFS
-    copy: src=alicefiles/cvmfs-default.local dest=/etc/cvmfs/default.local 
+    template: src=alicefiles/cvmfs-default.j2 dest=/etc/cvmfs/default.local 
 
   - name: Run cvmfs_config setup
     command: cvmfs_config setup
