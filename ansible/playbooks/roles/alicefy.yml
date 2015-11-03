@@ -74,7 +74,7 @@
     become: yes
 
   - name: Create a tmpdir
-    file: dest=/mnt/tmp state=directory mode=777
+    file: dest=/mnt/local_data/tmp state=directory mode=777
     become: yes
 
   - name: Create a .libnetrc
@@ -121,7 +121,7 @@
     lineinfile: line="export PATH=$HOME/bin:$PATH:/cvmfs/alice.cern.ch/bin/"  dest=~aliprod/.bashrc  state=present
 
   - name: Set TMPDIR
-    lineinfile: line="export TMPDIR=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
+    lineinfile: line="export TMPDIR=/mnt/local_data/tmp/"  dest=~aliprod/.bashrc  state=present
 
 
 - name:  Install and set up CVMFS
