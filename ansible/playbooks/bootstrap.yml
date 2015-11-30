@@ -14,9 +14,9 @@
       stat: path=/dev/vdb
       register: stat_dev_vdb
 
-    - name: umount ephemeral disk
-      mount: name=/mnt src=/dev/vdb fstype=auto state=unmounted
-      when: stat_dev_vdb.stat.exists
+#    - name: umount ephemeral disk
+#      mount: name=/mnt src=/dev/vdb fstype=auto state=unmounted
+#      when: stat_dev_vdb.stat.exists
 
   #  - name: install xfsprogs (CentOS)
   #    yum: name=xfsprogs state=present
@@ -41,13 +41,13 @@
 #      mount: name=/mnt src=/dev/vdb fstype=auto state=mounted opts="noatime,nofail"
 #      when: stat_dev_vdb.stat.exists
 
-    - name: format ephemeral as ext4
-      filesystem: fstype=ext4 dev=/dev/vdb opts="-L ephemeral0" force=yes
-      when: stat_dev_vdb.stat.exists
+#    - name: format ephemeral as ext4
+#      filesystem: fstype=ext4 dev=/dev/vdb opts="-L ephemeral0" force=yes
+#      when: stat_dev_vdb.stat.exists
 
-    - name: mount ephemeral disk again
-      mount: name=/mnt src=/dev/vdb fstype=auto state=mounted opts="nofail"
-      when: stat_dev_vdb.stat.exists
+#    - name: mount ephemeral disk again
+#      mount: name=/mnt src=/dev/vdb fstype=auto state=mounted opts="nofail"
+#      when: stat_dev_vdb.stat.exists
 
     - name: clean yum state (CentOS)
       shell: yum clean all
