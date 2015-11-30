@@ -97,10 +97,7 @@
     lineinfile: dest=~aliprod/.alien/etc/aliend/startup.conf line="ALIEN_ORGANISATIONS=ALICE" create=yes
 
   - name: Copy the ALICE-startup.conf file
-    lineinfile: dest=~aliprod/.alien/etc/aliend/ALICE/startup.conf line={{ item }} create=yes
-    with_items:
-    - 'AliEnUser=aliprod'
-    - 'AliEnServices="Monitor CMreport CE MonaLisa"'
+    copy: dest=~aliprod/.alien/etc/aliend/ALICE/startup.conf src=alicefiles/ALICE_startup.conf
 
   - name: Set the ALIEN_DOMAIN env. var.
     lineinfile: line="export ALIEN_DOMAIN=hip-fi" dest=~aliprod/.alien/Environment state=present create=yes
