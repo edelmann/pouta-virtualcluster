@@ -254,7 +254,8 @@ class Cluster(object):
             new_nodes[i] = node
             self.nodes[noldnodes+i] = node
             self.__provision_vm_addresses(node, self.config['node'])
-            self.__provision_volumes(node, self.config['node']['volumes'])
+            if  'volumes' in self.config['node']:
+                self.__provision_volumes(node, self.config['node']['volumes'])
             print
 
         return new_nodes
