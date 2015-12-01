@@ -57,7 +57,7 @@
       file: path="{{ local_data_dir }}" state=directory
 
     - name: format local data
-      filesystem: fstype=ext4 dev={{ local_data_device }} opts="-L data"
+      filesystem: fstype=ext4 dev={{ local_data_device }} opts="-L data -m 0"
       when: local_data_device is defined
 
     - name: mount local data
