@@ -1,5 +1,4 @@
 ---
-
 - name: Some generic FE stuff
   hosts: cluster_master
   become: yes
@@ -21,8 +20,7 @@
     replace: regexp="^([0-9.]* {{groups['frontend'][0]}})$" replace="\1 {{groups['frontend'][0]}}.hip.fi" dest=/etc/hosts
 
   - name: Config. yum to use a proxy
-    ini_file: dest=/etc/yum.conf section=main option=proxy value=http://192.168.82.36:3128
-    when: is_centos
+    ini_file: dest=/etc/yum.conf section=main option=proxy value="http://192.168.82.60:3128"
 
   - name: Install the HEP_OSlibs
     yum: name=http://linuxsoft.cern.ch/wlcg/sl6/x86_64/HEP_OSlibs_SL6-1.0.16-0.el6.x86_64.rpm
@@ -136,16 +134,10 @@
   become : yes
   tasks:
 
-  - name: get local ip
-    local_action: shell ifconfig -a eth0 | awk '/inet addr:/{sub(".*:", "", $2); print $2}'
-    register: local_ip
-
   - name: Add the CERNVM repo
     copy: src=alicefiles/cernvm.repo dest=/etc/yum.repos.d/cernvm.repo 
 
   - name: Import the GPG key of the repo
-    environment:
-      http_proxy: "http://{{ local_ip.stdout }}:3128" 
     get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/RPM-GPG-KEY-CernVM  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-CernVM
 
   - name: Install CVMFS
