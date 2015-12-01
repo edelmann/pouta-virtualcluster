@@ -24,10 +24,8 @@
 - name: install misc auxiliary packages (CentOS)
   yum: name="{{ item }}" state=present
   with_items:
-  - btrfs-progs
   - tree
   - wget
-  - tmux
   - bash-completion
   - dstat
   - nc
@@ -36,10 +34,8 @@
 - name: install misc auxiliary packages (Ubuntu)
   apt: name="{{ item }}" state=present
   with_items:
-  - btrfs-tools
   - tree
   - wget
-  - tmux
   - bash-completion
   - dstat
   when: is_debian_or_ubuntu
