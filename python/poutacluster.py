@@ -210,7 +210,7 @@ class Cluster(object):
         # reload information after instance has reached active state
         self.frontend = oaw.get_instance(self.nova_client, self.frontend.id)
         self.__provision_vm_addresses(self.frontend, self.config['frontend'])
-        if 'volumes' in self.config['frontend']:
+        if self.config['frontend'].get('volumes'):
             self.__provision_volumes(self.frontend, self.config['frontend']['volumes'])
 
 
@@ -254,7 +254,7 @@ class Cluster(object):
             new_nodes[i] = node
             self.nodes[noldnodes+i] = node
             self.__provision_vm_addresses(node, self.config['node'])
-            if  'volumes' in self.config['node']:
+            if self.config['node'].get('volumes'):
                 self.__provision_volumes(node, self.config['node']['volumes'])
             print
 
@@ -292,7 +292,7 @@ class Cluster(object):
             node = oaw.get_instance(self.nova_client, node.id)
             self.nodes[i] = node
             self.__provision_vm_addresses(node, self.config['node'])
-            if 'volumes' in self.config['node']:
+            if self.config['node'].get('volumes'):
                 self.__provision_volumes(node, self.config['node']['volumes'])
             print
 
