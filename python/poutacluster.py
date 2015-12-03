@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-Poutacluster - helper script to set up a cluster in pouta.csc.fi
+Poutacluster - helper script to set up an ALICE cluster in pouta.csc.fi
 
-@author: Olli Tourunen
+@author: Olli Tourunen, Erik Edelmann
 """
 
 import os
