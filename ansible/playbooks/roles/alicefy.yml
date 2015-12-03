@@ -16,9 +16,6 @@
   become: yes
   tasks:
 
-  - name: Add frontend FQDN to /etc/hosts
-    replace: regexp="^([0-9.]* {{groups['frontend'][0]}})$" replace="\1 {{groups['frontend'][0]}}.hip.fi" dest=/etc/hosts
-
   - name: Config. yum to use a proxy
     ini_file: dest=/etc/yum.conf section=main option=proxy value="http://192.168.82.60:3128"
 
