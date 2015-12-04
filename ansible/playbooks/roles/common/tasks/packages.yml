@@ -29,6 +29,7 @@
   - bash-completion
   - dstat
   - nc
+  - mlocate
   when: is_centos
 
 - name: install misc auxiliary packages (Ubuntu)
