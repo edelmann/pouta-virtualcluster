@@ -1,3 +1,3 @@
 #!/bin/bash
 
-qstat -u '*' | awk '$5 == "r"{n[$8]++}$5 == "qw"{q++}END{for (s in n) print s, n[s];print "queing: ", q}' | sort
+qstat -u '*' | awk '$5 == "r"{n[$8]++;N++}$5 == "qw"{q++}END{for (s in n) print s, n[s];print "all.q@sum         ", N; print "Queing: ", q}' | sort
