@@ -7,8 +7,15 @@
   - name: Set the FQDN
     command: hostname {{inventory_hostname}}.hip.fi
 
-  - name: Add a qstatsummary command
-    copy: src=alicefiles/qstatsummary dest=/usr/local/bin/qstatsummary mode=755
+  - name: install numpy
+    yum: name=numpy state=present
+
+  - name: Copy a few scripts
+    copy: src=alicefiles/{{ item }} dest=/usr/local/bin/{{ item }} mode=755
+    with_items:
+    - qstatsummary
+    - typestat.py
+    - typestatsum.py
 
 
 - name: Some generic stuff
