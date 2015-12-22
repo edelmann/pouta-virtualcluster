@@ -80,12 +80,8 @@
     register: mnt_tmp_exists
     ignore_errors: True
 
-  - name: Create /mnt/local_data/tmp
-    file: dest=/mnt/local_data/tmp state=directory owner=aliprod
-    become: yes
-
   - name: Create /mnt/tmp if it doesn't exist
-    file:  src=/mnt/local_data/tmp path=/mnt/tmp state=link mode=777
+    file:  path=/mnt/tmp state=directory mode=777
     become: yes
     when: mnt_tmp_exists|failed
 
