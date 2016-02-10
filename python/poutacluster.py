@@ -577,7 +577,7 @@ class Cluster(object):
                         if 'device' in vol_spec:
                             vol_vars.append('shared_data_device=%s' % vol_spec['device'])
                         else:
-                            vol_vars.append('shared_data_device=/dev/vdd')
+                            vol_vars.append('shared_data_device=/dev/vdc')
                     else:
                         print 'WARN: unknown magic volume name %s ' % vol_spec['name']
             return vol_vars
