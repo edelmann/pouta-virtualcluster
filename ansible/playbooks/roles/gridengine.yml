@@ -42,7 +42,7 @@
     command: qconf -mattr queue {{ item.var }} {{ item.val }} all.q
     with_items:
       - { var: 'h_rt', val: '172800' }
-      - { var: 'h_vmem', val: '6294967296' }
+      - { var: 'h_vmem', val: '5368709120' }
       - { var: 'shell', val: '/bin/bash' }
       - { var: 'tmpdir', val: '/mnt/tmp' }
 
