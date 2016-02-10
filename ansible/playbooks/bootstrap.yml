@@ -22,16 +22,8 @@
   #    yum: name=xfsprogs state=present
   #    when: is_centos
 
-  #  - name: install xfsprogs (Ubuntu)
-  #    apt: name=xfsprogs state=present
-  #    when: is_debian_or_ubuntu
-
   #  - name: format ephemeral as xfs
   #    filesystem: fstype=xfs dev=/dev/vdb opts="-L ephemeral0" force=yes
-
-#    - name: install btrfs-tools (Ubuntu)
-#      apt: name=btrfs-tools state=present
-#      when: is_debian_or_ubuntu
 
 #    - name: format ephemeral as btrfs
 #      filesystem: fstype=btrfs dev=/dev/vdb opts="-L ephemeral0" force=yes
@@ -52,10 +44,6 @@
     - name: clean yum state (CentOS)
       shell: yum clean all
       when: is_centos
-
-    - name: update apt repos (Ubuntu)
-      apt: update_cache=yes
-      when: is_debian_or_ubuntu
 
     - name: disable SELinux (CentOS)
       action: selinux state=disabled

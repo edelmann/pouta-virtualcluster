@@ -15,21 +15,9 @@
 #                 internet* are accepted (but not from the internal
 #
 
-- name: Install iptables packages (Ubuntu)
-  apt: name={{item}}
-  when: is_debian_or_ubuntu
-  with_items:
-    - iptables
-    - iptables-persistent
-  tags: iptables
-
 - name: Install iptables package (CentOS)
   yum: name=iptables
   when: is_centos
-  tags: iptables
-
-- action: set_fact destfile=/etc/iptables/rules.v4
-  when: is_debian_or_ubuntu and is_docker_container is not defined
   tags: iptables
 
 - action: set_fact destfile=/etc/sysconfig/iptables

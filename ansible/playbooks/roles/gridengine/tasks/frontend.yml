@@ -1,13 +1,4 @@
 ---
-- name: Install GridEngine APT packages
-  apt: name={{item}} state=latest
-  when: is_debian_or_ubuntu
-  with_items:
-    - gridengine-client
-    - gridengine-common
-    - gridengine-master
-    - gridengine-qmon
-
 - name: Install GridEngine RPM packages
   yum: name={{item}} state=latest
   when: is_centos

@@ -37,10 +37,6 @@
       yum: name=pdsh state=present
       when: is_centos
 
-    - name: install pdsh
-      apt: name=pdsh state=present
-      when: is_debian_or_ubuntu
-
     - name: set pdsh default transport to ssh
       lineinfile: name=/etc/pdsh/rcmd_default create=yes line='ssh' state=present
 
