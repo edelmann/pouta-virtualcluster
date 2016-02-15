@@ -44,21 +44,6 @@
       force=yes
 
 
-- name: Some generic node stuff
-  hosts: node
-  become: yes
-  tasks:
-
-  - name: Set up a cron job to clean the filesystem of AliEn files
-    copy: src=alicefiles/crondaily dest=/etc/cron.daily/cleanalice mode=755
-
-  - name: Copy the stray process searching script
-    copy: src=alicefiles/seek_stray.py dest=/usr/local/bin/seek_stray mode=755
-
-  - name: Add a crontab entry to kill stray processes
-    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray `" name="Kill stray processes"
-
-
 - name: Create the aliprod user on FE and nodes
   hosts: all
   tasks:
@@ -135,6 +120,21 @@
     lineinfile: line="export TMPDIR=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
 
 
+- name: Some generic node stuff
+  hosts: node
+  become: yes
+  tasks:
+
+  - name: Set up a cron job to clean the filesystem of AliEn files
+    copy: src=alicefiles/crondaily dest=/etc/cron.daily/cleanalice mode=755
+
+  - name: Copy the stray process searching script
+    copy: src=alicefiles/seek_stray.py dest=/usr/local/bin/seek_stray mode=755
+
+  - name: Add a crontab entry to kill stray processes
+    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray `" name="Kill stray processes"
+
+
 - name:  Install and set up CVMFS
   hosts: cvmfs
   become : yes
@@ -147,7 +147,7 @@
     get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/RPM-GPG-KEY-CernVM  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-CernVM
 
   - name: Install CVMFS
-    yum: name="{{ item }}" state=present
+    yum: name="{{ item }}" state=latest
     with_items:
     - cvmfs
     - cvmfs-init-scripts
