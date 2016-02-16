@@ -11,7 +11,7 @@ def Exec(cmd):
 
 all_specialusers = ["alicecaf", "alicedaq", "alicemdc", "alice_upb", "alidaq", "alieniss", "alienmaster", "aliprod", "alirec", "alishift", "alitrain"]
 specialusers = ["aliprod", "alitrain", "alidaq"]
-all_sites = ["ALICE::CSC::SLURM", "ALICE::SNIC::SLURM", "ALICE::LUNARC::SLURM", "ALICE::DCSC_KU::ARC", "ALICE::UIB::ARC", "ALICE::HIP::SGE"]
+all_sites = ["ALICE::SNIC::SLURM", "ALICE::LUNARC::SLURM", "ALICE::DCSC_KU::ARC", "ALICE::UIB::ARC", "ALICE::HIP::SGE"]
 
 
 if len(sys.argv) == 1:
