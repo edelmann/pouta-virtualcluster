@@ -22,4 +22,5 @@
   - dstat
   - nc
   - mlocate
+  - screen
   when: is_centos
