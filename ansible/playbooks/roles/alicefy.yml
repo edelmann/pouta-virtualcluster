@@ -5,7 +5,7 @@
   tasks:
 
   - name: Set the FQDN
-    command: hostname {{inventory_hostname}}.hip.fi
+    command: hostname {{inventory_hostname}}
 
   - name: install numpy
     yum: name=numpy state=present
