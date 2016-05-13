@@ -13,12 +13,12 @@
     - name: make sure shared_data_dir exists
       file: path="{{ shared_data_dir }}" state=directory
 
-    #- name: mount shared data
-    #  mount: name={{ shared_data_dir }} src='LABEL=shared' state=mounted opts=defaults fstype=ext4
-    #  when: shared_data_device is defined
-    #  notify:
-    #    - restart nfsd
-    #    - restart nfs-kernel-server
+    - name: mount shared data
+      mount: name={{ shared_data_dir }} src='LABEL=shared' state=mounted opts=defaults fstype=ext4
+      when: shared_data_device is defined
+      notify:
+        - restart nfsd
+        - restart nfs-kernel-server
 
     - name: export shared data
       nfsexport: path={{ shared_data_dir }} dest=/etc/exports clients="{{ groups.cluster_slave }}"
@@ -27,11 +27,11 @@
         - restart nfsd
         - restart nfs-kernel-server
 
-    - name: export home
-      nfsexport: path=/home dest=/etc/exports clients="{{ groups.cluster_slave }}" options=rw,no_root_squash,sync
-      notify:
-        - restart nfsd
-        - restart nfs-kernel-server
+    #- name: export home
+    #  nfsexport: path=/home dest=/etc/exports clients="{{ groups.cluster_slave }}" options=rw,no_root_squash,sync
+    #  notify:
+    #    - restart nfsd
+    #    - restart nfs-kernel-server
 
     - name: install pdsh
       yum: name=pdsh state=present
@@ -69,6 +69,6 @@
   name: Cluster slave preparation
   sudo: yes
   tasks:
-    - include: common/tasks/nfs-clients.yml nfsserver="{{ groups.cluster_master[0] }}" nfspath=/home nfsmount=/home
+    #- include: common/tasks/nfs-clients.yml nfsserver="{{ groups.cluster_master[0] }}" nfspath=/home nfsmount=/home
     - include: common/tasks/nfs-clients.yml nfsserver="{{ groups.cluster_master[0] }}" nfspath={{ shared_data_dir }}
                nfsmount={{ shared_data_dir }}
