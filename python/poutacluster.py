@@ -572,7 +572,7 @@ class Cluster(object):
                         if 'device' in vol_spec:
                             vol_vars.append('local_data_device=%s' % vol_spec['device'])
                         else:
-                            vol_vars.append('local_data_device=/dev/vdc')
+                            vol_vars.append('local_data_device=/dev/vdb')
                     elif vol_spec['name'] == 'shared_data':
                         if 'device' in vol_spec:
                             vol_vars.append('shared_data_device=%s' % vol_spec['device'])
@@ -623,7 +623,7 @@ class Cluster(object):
         lines.append('')
 
         lines.append('[all:vars]')
-        lines.append('local_data_dir=/mnt/local_data')
+        lines.append('local_data_dir=/mnt/tmp')
         lines.append('shared_data_dir=/mnt/shared_data')
 
         return lines

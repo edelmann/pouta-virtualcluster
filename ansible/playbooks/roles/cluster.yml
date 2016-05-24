@@ -62,6 +62,9 @@
       when: local_data_device is defined
       ignore_errors: true
 
+    - name: Set permissions for the local data dir
+      file: path="{{ local_data_dir }}"  mode=0777
+
   handlers:
     - include: common/handlers/main.yml
 
