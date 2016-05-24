@@ -23,4 +23,5 @@
   - nc
   - mlocate
   - screen
+  - tmpwatch
   when: is_centos

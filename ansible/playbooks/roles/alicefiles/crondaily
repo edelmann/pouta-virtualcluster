@@ -1,4 +1,4 @@
 #!/bin/bash
 
-find /mnt/aliprod/ -type f  -ctime +2 -exec rm -rf {} \;
-find /mnt/tmp/ -type f  -ctime +2 -exec rm -rf {} \;
+tmpwatch -m -f 48 /mnt/tmp
+tmpwatch -m -f 48 /mnt/aliprod
