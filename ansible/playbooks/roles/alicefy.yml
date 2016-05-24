@@ -132,7 +132,7 @@
     copy: src=alicefiles/seek_stray.py dest=/usr/local/bin/seek_stray mode=755
 
   - name: Add a crontab entry to kill stray processes
-    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray `" name="Kill stray processes"
+    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="Kill stray processes"
 
 
 - name:  Install and set up CVMFS
