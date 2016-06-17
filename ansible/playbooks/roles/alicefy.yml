@@ -44,6 +44,38 @@
       force=yes
 
 
+- name: Create a swap file
+  become: yes
+  hosts: cluster_slave
+  vars:
+    swapfile: '/swapfile'
+    swapsize: 2G
+  tasks:
+
+  - name: Check if the swapfile is already enabled
+    command: grep {{ swapfile }} /proc/swaps
+    register: swap_found
+    ignore_errors: True
+
+  - name: Create swapfile
+    command: fallocate -l {{ swapsize }} {{ swapfile }} creates={{ swapfile }}
+    when: swap_found|failed
+
+  - name: Format swapfile
+    command: mkswap {{ swapfile }}
+    when: swap_found|failed
+
+  - name: Set permissions for swapfile
+    file: path={{ swapfile }} owner=root group=root mode=0600
+
+  - name: Run swapon
+    command: swapon {{ swapfile }}
+    when: swap_found|failed
+
+  - name: Put the swapfile into /etc/fstab
+    mount: name=swap src={{ swapfile }} fstype=swap opts=sw passno=0 dump=0 state=present
+
+
 - name: Create the aliprod user on FE and nodes
   hosts: all
   tasks:
