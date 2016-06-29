@@ -1,0 +1,4 @@
+---
+- include: generic.yml
+- include: squid.yml
+- include: virtualcluster.yml

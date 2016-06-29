@@ -1,0 +1,23 @@
+---
+- name: Set up Squid
+  become: yes
+  hosts: all
+  tasks:
+  
+  - name: Install Squid
+    yum: name={{ item }}
+    with_items:
+    - squid
+    - squid-sysvinit
+
+  - name: Kill SELinux
+    selinux: state=disabled
+
+  - name: Create a squid cache dir
+    file: path=/mnt/squid_cache state=directory owner=squid group=squid
+  
+  - name: Copy squid.conf
+    copy: dest=/etc/squid/squid.conf src=templates/squid.conf
+
+  - name: Start Squid
+    service: name=squid enabled=yes state=started

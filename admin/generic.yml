@@ -1,0 +1,23 @@
+---
+- name: Some generic stuff
+  hosts: all
+  tasks:
+
+  - name: Install some stuff
+    become: yes
+    yum: name={{ item }} state=latest
+    with_items:
+    - vim-X11
+    - xorg-x11-xauth
+    - dejavu-sans-mono-fonts
+    - PackageKit-gtk3-module
+    - libcanberra-gtk2
+    - nc
+    - screen
+    - bash-completion
+    - yum-plugin-priorities
+    - git
+
+  - name: Set the timezone
+    become: yes
+    command: timedatectl set-timezone Europe/Helsinki

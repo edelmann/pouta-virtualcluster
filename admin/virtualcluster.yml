@@ -1,0 +1,66 @@
+---
+- name: Install the ALICE version of 'pouta-virtualcluster'
+  hosts: all
+  tasks:
+  
+  - name: Install the RDO repo (for openstack tools)
+    become: yes
+    yum: name=https://rdoproject.org/repos/rdo-release.rpm
+
+  - name: Install some stuff
+    become: yes
+    yum: name={{ item }} state=latest
+    with_items:
+    - openssh-clients
+    - python-openstackclient
+    - python-keystoneclient
+    - python-novaclient
+    - python-cinderclient
+    - python-neutronclient
+    - python-glanceclient
+    - python-yaml
+    - ansible
+
+  - name: Copy the openrc.sh file
+    copy: 
+      src=templates/dojkim-openrc.sh
+      dest=~/dojkim-openrc.sh
+      mode=600
+      owner=cloud-user
+    
+  - name: Create a .globus dir
+    file: dest=~/.globus state=directory
+
+  - name: copy the certificate
+    copy:
+      src=templates/{{ item }}
+      dest=~/.globus/{{ item }}
+      mode=600
+      owner=cloud-user
+    with_items:
+      - usercert.pem
+      - userkey.pem
+
+  - name: Copy .gitconfig
+    copy: src=~/.gitconfig dest=~/.gitconfig
+
+  - name: Clone the pouta-virtualcluster git repo
+    git:
+      repo=https://github.com/edelmann/pouta-virtualcluster.git
+      dest=~cloud-user/pouta-virtualcluster
+
+  - name: Create a ~/bin
+    file: dest=~/bin state=directory
+
+  - name: Make a few links
+    file: dest={{ item.dest }} src={{ item.src }} state=link
+    with_items:
+    - { dest: ~/bin/poutacluster, src: ~/pouta-virtualcluster/python/poutacluster.py }
+    - { dest: ~/ansible, src: ~/pouta-virtualcluster/ansible }
+    - { dest: ~/.ansible.cfg, src: ~/pouta-virtualcluster/ansible/cfg/ansible-centos6.cfg }
+
+  - name: Create a alice-cluster dir
+    file: dest=~/alice-cluster state=directory
+
+  - name: Copy the cluster.yml file
+    copy: src=templates/cluster.yml dest=~/alice-cluster/cluster.yml

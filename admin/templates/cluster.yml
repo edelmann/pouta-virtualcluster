@@ -1,0 +1,60 @@
+---
+cluster:
+  name: alice
+  description: An ALICE Cluster
+  network: dojkim
+  server-group-policy: none
+  allow-traffic-from-sec-groups:
+    - bastion
+    #- VOBox
+  int-secgroup-rules:
+    - tcp 1    65536 0.0.0.0/0
+    - udp 1    65536 0.0.0.0/0
+  ext-secgroup-rules:
+    - tcp 22   22   0.0.0.0/0
+    - tcp 80   80   193.166.1.98/16
+    - tcp 8084 8084 86.50.169.0/24    
+    - tcp 8084 8084 192.168.82.0/24    
+    - tcp 8084 8084 128.142.0.0/16    
+    - tcp 8084 8084 137.138.0.0/16
+    - tcp 8084 8084 188.184.0.0/15
+    - tcp 1093 1093 0.0.0.0/0
+    - tcp 9000 9010 0.0.0.0/0
+    - tcp 9991 9991 128.142.0.0/16    
+    - tcp 9991 9991 137.138.0.0/16
+    - tcp 9991 9991 188.184.0.0/15
+    - udp 8884 8884 192.168.0.0/16 
+    - udp 8884 8884 86.50.169.0/24 
+    - udp 9000 9000 0.0.0.0/0
+    - udp 9930 9930 0.0.0.0/0
+    - icmp 1  1  0.0.0.0/0
+  
+
+frontend:
+  sec-key: cluster-key
+  image: CentOS-6.6
+  admin-user: cloud-user
+  flavor: standard.tiny
+  public-ip: 86.50.169.219
+  volumes:
+    - name: shared_data
+      size: 10
+  groups:
+    - common
+    - cluster_master
+    - ge_master
+    - cvmfs
+
+node:
+  sec-key: cluster-key
+  image: CentOS-6.6
+  admin-user: cloud-user
+  flavor: hpc-gen1.8core   # If this ever changes, the HEPSPEC06 benchmark has to be rerun.
+#  volumes:
+#    - name: local_data
+#      size: 100
+  groups:
+    - common
+    - cluster_slave
+    - ge_slave
+    - cvmfs
