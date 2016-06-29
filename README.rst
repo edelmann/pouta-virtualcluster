@@ -4,26 +4,23 @@ Poutacluster
 
 **NOTE: This is a work in progress**
 
-Pouta-virtualcluster is a helper script and a set of Ansible playbooks to quickly setup a cluster in **pouta.csc.fi**
-IaaS service. It draws heavily from the *ElastiCluster* by *Grid Computing Competence Center, University of Zurich*,
-especially most of the Ansible playbooks are based on ElastiCluster. Provisioning code, however, is written from scratch
-to support volumes (persistent storage), server affinity and security group relations. It runs directly against
-OpenStack Python API.
+Pouta-virtualcluster is a helper script and a set of Ansible playbooks to
+quickly setup an ALICE cluster in **pouta.csc.fi** IaaS service. It draws
+heavily from the *ElastiCluster* by *Grid Computing Competence Center,
+University of Zurich*, especially most of the Ansible playbooks are based
+on ElastiCluster. Provisioning code, however, is written from scratch to
+support volumes (persistent storage), server affinity and security group
+relations. It runs directly against OpenStack Python API.
 
 Currently poutacluster can provision:
 
-* Basic cluster infra on top of CentOS 6.6 or Ubuntu 14.04 with one frontend and N compute nodes
+* A cluster suitable for ALICE computing on top of CentOS witth one frontend and N compute nodes
 
   - frontend and compute nodes can have different images, flavors and keys
   - frontend has a public IP
-  - there is a volume for local persistent data
+  - there can be a volume for local persistent data
   - frontend has a separate shared volume, exported with NFS to the worker nodes from */mnt/shared_data*
-  - frontend also exports */home*
-
-* Ganglia for monitoring
-* GridEngine for batch processing
-* Apache Hadoop 1.2.1
-* Apache Spark 1.3.1
+  - GridEngine for batch processing
 
 How it works
 ============
@@ -43,20 +40,19 @@ Provisioning VMs for cluster goes roughly like this:
 * Missing VMs are provisioned
 
   - first frontend, then appropriate number of nodes
-  - naming: *[cluster-name]-fe* and *[cluster-name]-node[number]*. If your cluster name was be *my-cluster*,
-    you would get
+  - naming: *[cluster-name]-tron and *[cluster-name]-node[number]*. If your
+    cluster name was be *alice*, you would get
 
-      + my-cluster-fe
-      + my-cluster-node01
-      + my-cluster-node02
+      + alice-tron
+      + alice-node01
+      + alice-node02
       + ...
 
   - VMs are launched from the specified image with specified flavor. They are placed in an OpenStack server group with
-    anti-affinity policy to distribute them on separate hosts for better fault tolerance.
+    anti-affinity policy to distribute them on separate hosts for better
+    fault tolerance. (the latter sentecne isn'nt true right now)
   - volumes are created or reused and attached
   - template security groups are created if these don't exist already
-
-
 
 * Ansible host inventory file is created, mapping VMs to assigned roles
 
@@ -89,16 +85,16 @@ To use CSC Pouta cloud environment you will need
 
 See https://research.csc.fi/pouta-user-guide for details
 
-Setting up bastion host
------------------------
+Setting up an admin node
+-------------------------
 
 Note: Here we assume that you are already past the basic steps mentioned above.
 
-Create a small management VM to act as a "bastion" host (http://en.wikipedia.org/wiki/Bastion_host)
+Create a small management VM to act as an admin node
 
 * Log into https://pouta.csc.fi
 * If you are member of multiple projects, select the desired one from the drop down list on top left
-* Create a new security group called, for example, 'bastion'
+* Create a new security group called, for example, 'admin'
 
   - go to *Access and Security -> Security groups -> Create Security Group*
   - add rules to allow ssh for yourself and other admins
@@ -109,11 +105,10 @@ Create a small management VM to act as a "bastion" host (http://en.wikipedia.org
 
   - go to *Access and Security -> Keypairs -> Create/Import Keypair*
 
-* Boot a new VM from the latest CentOS 6 image that is provided by CSC
+* Boot a new VM
 
   - go to *Instances -> Launch Instance*
-  - Image: Latest public Centos image (CentOS 6.6 at the time of writing)
-  - Flavor: tiny
+  - Flavor: hpc-gen1.1core (maybe 'standard.tiny could work as well?)
   - Keypair: select your key
   - Security Groups: select only *bastion*
   - Network: select the desired network (you probably only have one, which is the default and ok)
