@@ -50,9 +50,9 @@ node:
   image: CentOS-6.6
   admin-user: cloud-user
   flavor: hpc-gen1.8core   # If this ever changes, the HEPSPEC06 benchmark has to be rerun.
-#  volumes:
-#    - name: local_data
-#      size: 100
+  volumes:
+    - name: local_data
+      size: 100
   groups:
     - common
     - cluster_slave
