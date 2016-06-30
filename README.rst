@@ -199,13 +199,15 @@ Reboot the nodes::
        openstack server list # Check the ID of the node
        openstack server reboot <ID>
 
-    and wait for a few minutes.
+     and wait for a few minutes.
 
-  - You may have to log in and (re-)start the sge_execd raemon::
+     You may have to log in and (re-)start the sge_execd raemon::
+
       sudo /etc/init.d/sge_execd status
       sudo /etc/init.d/sge_execd start  # if down
 
   2. If rebooting didn't help remove the node and create a new one::
+
       openstack server list  # check the ID of the node
       openstack server delete <ID>
       poutacluster add 1
