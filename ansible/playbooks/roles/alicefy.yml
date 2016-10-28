@@ -49,7 +49,7 @@
   hosts: cluster_slave
   vars:
     swapfile: '/swapfile'
-    swapsize: 2G
+    swapsize: 1G
   tasks:
 
   - name: Check if the swapfile is already enabled
@@ -159,6 +159,9 @@
 
   - name: Set up a cron job to clean the filesystem of AliEn files
     copy: src=alicefiles/crondaily dest=/etc/cron.daily/cleanalice mode=755
+
+  - name: Add a crontab entry to remove core files
+    cron: hour="*/4" job="find /mnt/tmp/ALICE/wrk -cmin +360 -type f -name 'core.*' -exec rm {} \;" name="Remove core files"
 
   - name: Copy the stray process searching script
     copy: src=alicefiles/seek_stray.py dest=/usr/local/bin/seek_stray mode=755
