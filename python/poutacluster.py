@@ -623,7 +623,7 @@ class Cluster(object):
         lines.append('')
 
         lines.append('[all:vars]')
-        lines.append('local_data_dir=/mnt/tmp')
+        lines.append('local_data_dir=/mnt/cache')
         lines.append('shared_data_dir=/mnt/shared_data')
 
         return lines
