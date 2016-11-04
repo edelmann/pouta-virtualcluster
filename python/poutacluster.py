@@ -74,6 +74,7 @@ class Cluster(object):
 
         print '    creating %s: %s  - %s' % (name, spec['image'], spec['flavor'])
         print "    using network '%s'" % network
+        print "    and key '%s'" % spec['sec-key']
         instance_id = oaw.create_vm(self.nova_client, name, image_id, flavor_id, spec['sec-key'], sec_groups,
                                     network_id, server_group_id)
 
