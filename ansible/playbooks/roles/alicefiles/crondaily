@@ -1,4 +1,4 @@
 #!/bin/bash
 
-tmpwatch -m -f 48 /mnt/tmp
+tmpwatch -m -f 27 /mnt/tmp
 tmpwatch -m -f 48 /mnt/aliprod
