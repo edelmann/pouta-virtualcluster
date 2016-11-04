@@ -23,6 +23,15 @@
   become: yes
   tasks:
 
+  - name: Copy public ssh key for cloud-user
+    lineinfile:
+      dest: ~cloud-user/.ssh/authorized_keys
+      line: "{{ item }}"
+      create: yes
+    with_file:
+      - ~/.ssh/id_rsa.pub
+      - ~/.ssh/cpouta_key.pub
+
   - name: Config. yum to use a proxy
     ini_file: dest=/etc/yum.conf section=main option=proxy value="http://192.168.82.60:3128"
 
@@ -89,8 +98,15 @@
     become: yes
     become_user: aliprod
 
-  - name: Copy public ssh key
-    copy: src=~/.ssh/id_rsa.pub  dest=~aliprod/.ssh/authorized_keys mode=600
+
+  - name: Copy public ssh key for aliprod
+    lineinfile:
+      dest: ~aliprod/.ssh/authorized_keys
+      line: "{{ item }}"
+      create: yes
+    with_file:
+      - ~/.ssh/id_rsa.pub
+      - ~/.ssh/cpouta_key.pub
     become: yes
     become_user: aliprod
 
