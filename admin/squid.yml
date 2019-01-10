@@ -5,10 +5,10 @@
   tasks:
   
   - name: Install Squid
-    yum: name={{ item }}
-    with_items:
-    - squid
-    - squid-sysvinit
+    yum:
+      name:
+        - squid
+        - squid-sysvinit
 
   - name: Kill SELinux
     selinux: state=disabled

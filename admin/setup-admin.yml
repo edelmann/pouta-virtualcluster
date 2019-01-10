@@ -1,4 +1,4 @@
 ---
-- include: generic.yml
-- include: squid.yml
-- include: virtualcluster.yml
+- import_playbook: generic.yml
+- import_playbook: squid.yml
+- import_playbook: virtualcluster.yml
