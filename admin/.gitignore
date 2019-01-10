@@ -1,0 +1,6 @@
+*.swp
+ansible-hosts
+*.retry
+templates/dojkim-openrc.sh
+templates/usercert.pem
+templates/userkey.pem
