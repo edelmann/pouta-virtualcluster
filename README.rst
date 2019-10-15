@@ -110,7 +110,7 @@ Create a small management VM to act as an admin node and Squid proxy server
 
   - go to *Instances -> Launch Instance*
   - Image: Latest CentOS-7
-  - Flavor: hpc-gen1.1core (maybe 'standard.tiny could work as well?)
+  - Flavor: standard.small (or maybe even standard.tiny?)
   - Keypair: select your key
   - Security Groups: select only *bastion*
   - Network: select the desired network (you probably only have one, which is the default and ok)
