@@ -1,0 +1,75 @@
+---
+- name: Install dependencies
+  become: yes
+  yum:
+    state: installed
+    name:
+    - openssl
+    - openssl-devel
+    - pam-devel
+    - numactl
+    - numactl-devel
+    - hwloc
+    - hwloc-devel
+    - lua
+    - lua-devel
+    - readline-devel
+    - rrdtool-devel
+    - ncurses-devel
+    - man2html
+    - libibmad
+    - libibumad
+    - rpm-build
+    - perl-ExtUtils-MakeMaker
+
+- name: Download slurm
+  copy: 
+    src: slurm-{{ slurm_version }}.tar.bz2
+    dest: ~/slurm-{{ slurm_version }}.tar.bz2
+
+- name: Set path to RPMS
+  set_fact: slurm_rpms=/home/cloud-user/rpmbuild/RPMS/x86_64
+
+- name: Build RPMs
+  shell: rpmbuild -ta slurm-{{ slurm_version }}.tar.bz2 creates={{ slurm_rpms }}/slurm-{{ slurm_version }}-1.el7.centos.x86_64.rpm
+
+- name: Find Slurm RPMs
+  shell: "ls {{ slurm_rpms }}/slurm*.x86_64.rpm"
+  register: ls_rpms
+
+- name: Install Slurm RPMs
+  become: yes
+  yum:
+    name: "{{ ls_rpms.stdout_lines }}"
+    state: present
+
+- name: create a slurm user
+  become: yes
+  user:
+    name: slurm
+    createhome: no
+
+- name: Copy slurm.conf
+  become: yes
+  template:
+    src: slurm.conf.j2
+    dest: /etc/slurm/slurm.conf
+
+- name: Edit systemd/slurm*.service
+  become: yes
+  lineinfile:
+    path: "{{ item.path }}"
+    line: "{{ item.line }}"
+    regexp: "PIDFile=.*"
+  with_items:
+  - { path: /usr/lib/systemd/system/slurmd.service, line: "PIDFile=/var/run/slurm/slurmd.pid" }
+  - { path: /usr/lib/systemd/system/slurmctld.service, line: "PIDFile=/var/run/slurm/slurmctld.pid" }
+
+
+- name: Create /var/run/slurm/
+  become: yes
+  file:
+    name: /var/run/slurm/
+    state: directory
+    owner: slurm
+    group: slurm
