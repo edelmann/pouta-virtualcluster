@@ -18,8 +18,8 @@
 # ganglia for monitoring
 - include: roles/ganglia.yml
 
-# gridengine for batch prosessing
-- include: roles/gridengine.yml
+# SLURM for batch prosessing
+- include: roles/slurm.yml
 
 # Hadoop/HDFS for map reduce and distributed filesystem
 - include: roles/hadoop.yml

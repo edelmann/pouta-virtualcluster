@@ -8,19 +8,21 @@ Wrapper against OpenStack nova and cinder APIs
 import os
 import time
 import itertools
-import novaclient
-from novaclient.openstack.common.apiclient.exceptions import NotFound
-import novaclient.v1_1
-import cinderclient.v1
+from novaclient import client
+from novaclient.exceptions import NotFound
+from cinderclient import client as cinderclient
 
 
 def get_clients():
+    version = "2" # os.environ['OS_IDENTITY_API_VERSION']
     un = os.environ['OS_USERNAME']
     pw = os.environ['OS_PASSWORD']
-    tenant = os.environ['OS_TENANT_NAME']
+    project_id = os.environ['OS_PROJECT_ID']
+    project_name = os.environ['OS_PROJECT_NAME']
     auth_url = os.environ['OS_AUTH_URL']
-    nova_client = novaclient.v1_1.client.Client(un, pw, tenant, auth_url)
-    cinder_client = cinderclient.v1.client.Client(un, pw, tenant, auth_url)
+    user_domain_name = os.environ['OS_USER_DOMAIN_NAME'] 
+    nova_client = client.Client(version, un, pw, project_id, auth_url, user_domain_name=user_domain_name)
+    cinder_client = cinderclient.Client(version, un, pw, project_name, auth_url, user_domain_name=user_domain_name)
     return nova_client, cinder_client
 
 
