@@ -18,6 +18,7 @@
         - bash-completion
         - yum-plugin-priorities
         - git
+        - mlocate
 
   - name: Set the timezone
     become: yes
