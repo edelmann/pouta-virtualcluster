@@ -1,18 +1,18 @@
 ---
 - name: Common configuration
-  hosts: ge_master:ge_slave
+  hosts: frontend:node
   sudo: yes
   roles:
     - slurm-common
 
 - name: GridEngine masternode play
-  hosts: ge_master
+  hosts: frontend
   sudo: yes
   roles:
     - slurm-fe
 
 - name: GridEngine worker nodes play
-  hosts: ge_slave
+  hosts: node
   sudo: yes
   roles:
     - slurm-wn

@@ -11,6 +11,8 @@ import itertools
 from novaclient import client
 from novaclient.exceptions import NotFound
 from cinderclient import client as cinderclient
+import subprocess
+import json
 
 
 def get_clients():
@@ -40,14 +42,43 @@ def wait_for_state(client, type, instance_id, tgt_state):
         print '    current state: %s, waiting for: %s' % (cur_state, tgt_state)
         time.sleep(5)
 
+def exec_cmd(cmd, split=True):
+    """
+    Execute the shell command 'cmd', and return the output
+    """
+    print "Running the command '%s'" % cmd
+
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    data, _ = process.communicate()
+    if split:
+        return data.strip().split('\n')
+    else:
+        return data
+
+
+def openstack_find(object_type, name):
+    output = exec_cmd("openstack %s list" % object_type)
+    for line in output:
+        if line[0] == '+': continue
+
+        fields = line.split(' ')
+        if fields[1] == 'ID': continue
+
+        o_id = fields[1]
+        o_name = fields[3]
+
+        if o_name == name:
+            return o_id, o_name
+        elif o_id == name:
+            return o_id, o_name
+    return None, None
+
 
 def check_image_exists(client, image):
-    for img in client.images.list():
-        if img.name == image:
-            return img.id
-        elif img.id == image:
-            return img.id
-    raise RuntimeError('Requested image "%s" does not exist' % image)
+    img_id = openstack_find("image", image)[0]
+    if not img_id:
+        raise RuntimeError('Requested images "%s" does not exist' % image)
+    return img_id
 
 
 def find_image_name_by_id(client, image_id):
@@ -75,56 +106,54 @@ def find_flavor_name_by_id(client, flavor_id):
 
 
 def check_secgroup_exists(client, secgroup):
-    for sg in client.security_groups.list():
-        if sg.name == secgroup:
-            return sg.id
-        elif sg.id == secgroup:
-            return sg.id
-    raise RuntimeError('Requested secgroup "%s" does not exist' % secgroup)
+    sg_id = openstack_find("security group", secgroup)[0]
+    if not sg_id:
+        raise RuntimeError('Requested security group "%s" does not exist' % secgroup)
+    return sg_id
 
 
 def check_network_exists(client, network):
-    for net in client.networks.list():
-        if net.label == network:
-            return net.id
-        elif net.id == network:
-            return net.id
-    raise RuntimeError('Requested network "%s" does not exist' % network)
+    net_id = openstack_find("network", network)[0]
+    if not net_id:
+        raise RuntimeError('Requested network "%s" does not exist' % network)
+    return net_id
 
 
 def create_sec_group(client, name, description):
-    return client.security_groups.create(name, description)
+    output = exec_cmd("openstack security group create --description '%s' %s -f json" % (description, name), split=False)
+    sg = json.loads(output)
+    return sg['id'], sg['name']
 
 
 def add_sec_group_rule(client, sec_group_id, ip_protocol, from_port, to_port, cidr):
-    client.security_group_rules.create(parent_group_id=sec_group_id,
-                                       ip_protocol=ip_protocol, from_port=from_port, to_port=to_port, cidr=cidr)
+    exec_cmd("openstack security group rule create --protocol %s --dst-port %s:%s --remote-ip %s %s"
+             % (ip_protocol, from_port, to_port, cidr, sec_group_id))
 
 
 def find_security_group_by_name(nova_client, name):
     try:
-        return nova_client.security_groups.find(name=name)
-    except NotFound:
+        return check_secgroup_exists(nova_client, name)
+    except RuntimeError:
         return None
 
+def security_group_rule_create(protocol, group_id, remote_group_id, port_range):
+    exec_cmd("openstack security group rule create --protocol %s --remote-group %s --dst-port %s %s"
+             % (protocol, remote_group_id, port_range, group_id))
 
 def create_local_access_rules(client, to_sec_group_name, from_sec_group_name):
     sg_to = find_security_group_by_name(client, to_sec_group_name)
     sg_from = find_security_group_by_name(client, from_sec_group_name)
 
-    client.security_group_rules.create(parent_group_id=sg_to.id, group_id=sg_from.id,
-                                       ip_protocol='tcp', from_port=1, to_port=65535)
-    client.security_group_rules.create(parent_group_id=sg_to.id, group_id=sg_from.id,
-                                       ip_protocol='udp', from_port=1, to_port=65535)
-    client.security_group_rules.create(parent_group_id=sg_to.id, group_id=sg_from.id,
-                                       ip_protocol='icmp', from_port=-1, to_port=-1)
+    security_group_rule_create(remote_group_id=sg_from, group_id=sg_to, protocol='tcp', port_range="1:65535")
+    security_group_rule_create(remote_group_id=sg_from, group_id=sg_to, protocol='udp', port_range="1:65535")
+    security_group_rule_create(remote_group_id=sg_from, group_id=sg_to, protocol='icmp', port_range="0:0")
 
 
 def delete_sec_group(client, name):
     sg = find_security_group_by_name(client, name)
     if sg:
-        client.security_groups.delete(sg.id)
-        return sg.id
+        client.security_groups.delete(sg)
+        return sg
 
 
 def delete_sec_group_rules(nova_client, name):
@@ -225,7 +254,7 @@ def get_volume(client, volume_id):
 
 def create_and_attach_volume(nova_client, cinder_client, prov_state, instance,
                              name, size, dev, async=False):
-    volume = cinder_client.volumes.create(size, display_name=name)
+    volume = cinder_client.volumes.create(size, name=name)
     prov_state['volume.%s.id' % name] = volume.id
     print '    created volume %s' % volume.id
 
@@ -280,23 +309,32 @@ def get_addresses(instance, ip_type='fixed'):
             if x['OS-EXT-IPS:type'] == ip_type]
 
 
+def list_floating_ips():
+    output = exec_cmd("openstack floating ip list -f json", split=False)
+    return json.loads(output)
+
 def find_free_floating_ip(nova_client):
-    fips = nova_client.floating_ips.list()
+    fips = list_floating_ips()
     for fip in fips:
-        if not fip.instance_id:
+        if not fip['Fixed IP Address']:
             return fip
+    return None
+
+
+def add_floating_ip(server, floating_ip):
+    exec_cmd("openstack server add floating ip %s %s" % (server, floating_ip))
 
 
 def associate_floating_address(nova_client, vm, floating_ip='auto'):
     # statically selected floating ip
     if floating_ip != 'auto':
-        fips = nova_client.floating_ips.list()
+        fips = list_floating_ips()
         for fip in fips:
-            if fip.ip == floating_ip:
-                if fip.instance_id:
+            if fip['Floating IP Address'] == floating_ip:
+                if fip['Fixed IP Address']:
                     raise RuntimeError('Selected floating IP is already in use: %s' % floating_ip)
                 else:
-                    vm.add_floating_ip(fip)
+                    add_floating_ip(vm.id, fip['Floating IP Address'])
                     return fip
 
         raise RuntimeError('Selected floating IP is not allocated to project: %s' % floating_ip)
@@ -310,9 +348,9 @@ def associate_floating_address(nova_client, vm, floating_ip='auto'):
             # if all are taken, allocate a new one
             if not free_fip:
                 free_fip = nova_client.floating_ips.create(nova_client.floating_ip_pools.list()[0].name)
-                print '    no free IPs, allocated a new IP for the project: %s' % free_fip.ip
+                print '    no free IPs, allocated a new IP for the project: %s' % free_fip['Floating IP Address']
 
-            print '    selected free IP: %s' % free_fip.ip
+            print '    selected free IP: %s' % free_fip['Floating IP Address']
 
             # associate the ip with the server
             # there is a potential race here, so minimize the risk by checking if we actually got the ip
