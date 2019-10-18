@@ -1,4 +1,5 @@
 ---
+- import_playbook: launch_bastion.yml
 - import_playbook: generic.yml
 - import_playbook: squid.yml
 - import_playbook: virtualcluster.yml

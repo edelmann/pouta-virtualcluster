@@ -1,0 +1,62 @@
+---
+- name: launch a bastion host
+  hosts: localhost
+  connection: local
+
+  tasks:
+
+  - name: Create bastion security group
+    os_security_group: name=bastion
+
+  - name: Add rule to security group to all ssh from everywhere
+    os_security_group_rule:
+      security_group: bastion
+      protocol: tcp
+      port_range_min: 22
+      port_range_max: 22
+      remote_ip_prefix: 0.0.0.0/0 
+
+  - name: Add rule to security group to allow squid / cvmfs access from the internal network
+    os_security_group_rule:
+      security_group: bastion
+      protocol: tcp
+      port_range_min: 1
+      port_range_max: 65535 
+      remote_ip_prefix: 192.168.0.0/16
+
+
+  - name: Create the Bastion
+    register: bastion_result
+    os_server:
+      name: admin
+      image: CentOS-7
+      flavor: standard.tiny
+      network: project_2001054
+      key_name: eriknew
+      security_groups: bastion
+    until: (bastion_result.openstack is defined) and (bastion_result.openstack.addresses.values()[0] | length > 1)
+    delay: 20
+    retries: 50
+
+  - name: Store the auto-allocated floating IP address for Bastion
+    set_fact: bastion_floating_ip={{ bastion_result.openstack.addresses.values()[0][1]["addr"] }}
+
+  - name: Store local IP
+    set_fact: bastion_local_ip={{ bastion_result.openstack.addresses.values()[0][0]["addr"] }}
+
+  - name: print some stuff
+    debug:
+      var: bastion_floating_ip
+
+  - name: Add bastion host to inventory
+    add_host:
+      name: admin
+      ansible_ssh_host: "{{ bastion_floating_ip }}"
+      local_ip: "{{ bastion_local_ip }}" 
+      groups: bastion
+      ansible_ssh_user: cloud-user
+
+  - name: Create an inventory file
+    template:
+        src: templates/hosts.j2
+        dest: ./hosts

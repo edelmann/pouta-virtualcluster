@@ -1,0 +1,11 @@
+{% for group in hostvars[inventory_hostname]["groups"] %}
+{% if group not in ["ungrouped", "all"] %}
+[{{ group }}]
+{% for host in hostvars %}
+{% if group in hostvars[host]["group_names"] %}
+{{ host }} ansible_ssh_host={{ hostvars[host]["ansible_ssh_host"] }} local_ip={{ hostvars[host]["local_ip"] }} ansible_ssh_user={{ hostvars[host]["ansible_ssh_user"] }}
+{% endif %}
+{% endfor %}
+
+{% endif %}
+{% endfor %}
