@@ -1,7 +1,7 @@
 ---
 - name: Ganglia master play
   hosts: ganglia_master
-  sudo: yes
+  become: yes
   tasks:
     - include: ganglia/tasks/server.yml
     - include: ganglia/tasks/monitor.yml
@@ -10,7 +10,7 @@
 
 - name: Ganglia monitor play
   hosts: ganglia_monitor
-  sudo: yes
+  become: yes
   tasks:
     - include: ganglia/tasks/monitor.yml
   handlers:

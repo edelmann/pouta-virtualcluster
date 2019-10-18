@@ -1,21 +1,18 @@
 ---
 - name: install nfs server (CentOS)
   yum: name=nfs-utils state=present
-  when: is_centos
   tags:
     - nfs
 
 # CentOS-specific actions
 - name: install nfs client (CentOS)
   yum: name=nfs-utils state=present
-  when: is_centos
   tags:
     -nfs
 
 # CentOS does not start needed services after installation
 - name: ensure nfs service is running and enabled (CentOS)
   service: name={{item}} state=started enabled=true
-  when: is_centos
   tags:
     - nfs
   with_items:

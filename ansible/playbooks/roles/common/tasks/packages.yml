@@ -1,11 +1,9 @@
 ---
 - name: update the system (CentOS)
   yum: name=* state=latest
-  when: is_centos
 
 - name: install acpid for soft reboots (CentOS)
   yum: name=acpid state=present
-  when: is_centos
 
 - name: configure and start acpid service
   service: name=acpid state=started enabled=true
@@ -14,14 +12,14 @@
   service: name=ntpd enabled=yes state=started
 
 - name: install misc auxiliary packages (CentOS)
-  yum: name="{{ item }}" state=present
-  with_items:
-  - tree
-  - wget
-  - bash-completion
-  - dstat
-  - nc
-  - mlocate
-  - screen
-  - tmpwatch
-  when: is_centos
+  yum:
+    state: present
+    name:
+    - tree
+    - wget
+    - bash-completion
+    - dstat
+    - nc
+    - mlocate
+    - screen
+    - tmpwatch

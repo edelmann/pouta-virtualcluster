@@ -1,0 +1,22 @@
+---
+- name: Install munge
+  yum:
+    name: ['munge', 'munge-libs', 'munge-devel']
+    state: installed
+  become: yes
+
+- name: Copy the key
+  become: yes
+  copy:
+    src: munge.key
+    dest: /etc/munge/munge.key 
+    mode: 0400
+    owner: munge
+    group: munge
+
+- name: Enable the munge daemon
+  become: yes
+  service:
+    name: munge
+    enabled: yes
+    state: started

@@ -1,7 +1,7 @@
 ---
 - name: Update, bootstrap and reboot if necessary
   hosts: all
-  sudo: yes
+  become: yes
   tasks:
 
     - name: stop cloud-init managing /etc/hosts
@@ -42,12 +42,10 @@
 #      when: stat_dev_vdb.stat.exists
 
     - name: clean yum state (CentOS)
-      shell: yum clean all
-      when: is_centos
+      command: yum clean all
 
     - name: disable SELinux (CentOS)
       action: selinux state=disabled
-      when: is_centos
       notify: reboot
 
   handlers:

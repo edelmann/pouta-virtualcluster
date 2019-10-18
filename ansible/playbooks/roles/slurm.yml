@@ -1,18 +1,18 @@
 ---
 - name: Common configuration
   hosts: frontend:node
-  sudo: yes
+  become: yes
   roles:
     - slurm-common
 
 - name: GridEngine masternode play
   hosts: frontend
-  sudo: yes
+  become: yes
   roles:
     - slurm-fe
 
 - name: GridEngine worker nodes play
   hosts: node
-  sudo: yes
+  become: yes
   roles:
     - slurm-wn

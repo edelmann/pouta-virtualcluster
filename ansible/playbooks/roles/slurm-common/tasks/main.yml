@@ -49,6 +49,10 @@
     name: slurm
     createhome: no
 
+- name: debug
+  debug:
+    var: hostvars['alice-node01']['ansible_facts']
+
 - name: Copy slurm.conf
   become: yes
   template:

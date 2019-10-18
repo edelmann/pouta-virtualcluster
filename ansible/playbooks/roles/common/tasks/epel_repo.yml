@@ -1,3 +1,8 @@
 - name: configure EPEL repository (CentOS)
-  action: copy src='etc/yum.repos.d/epel.repo.el{{ ansible_distribution_major_version }}' dest=/etc/yum.repos.d/epel.repo owner=root
-  when: ansible_distribution == 'CentOS'
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: https://download.fedoraproject.org/pub/epel/$releasever/$basearch/
+
+  #action: copy src='etc/yum.repos.d/epel.repo.el{{ ansible_distribution_major_version }}' dest=/etc/yum.repos.d/epel.repo owner=root
+  #when: ansible_distribution == 'CentOS'

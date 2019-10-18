@@ -1,7 +1,7 @@
 ---
 - name: Add a ssh key for given account on the frontend
   hosts: frontend
-  sudo: yes
+  become: yes
   tasks:
   - name: Add key
     authorized_key: user={{ key_user }} key="{{ item }}"

@@ -1,7 +1,7 @@
 ---
 - hosts: hadoop_namenode:hadoop_secnamenode:hadoop_datanode:hadoop_jobtracker:hadoop_tasktracker
   name: Prerequisites for Hadoop
-  sudo: yes
+  become: yes
   tasks:
     - include: common/tasks/iptables.yml trusted_hosts="{{ groups.all }}" default_accept=1
 #    - action: filesystem fstype=ext4 dev=/dev/vdc opts="-L data"
@@ -13,7 +13,7 @@
 
 - hosts: hadoop_namenode:hadoop_secnamenode:hadoop_datanode:hadoop_jobtracker:hadoop_tasktracker
   name: Install Hadoop
-  sudo: yes
+  become: yes
   vars:
     deburl: http://www.nic.funet.fi/pub/mirrors/apache.org/hadoop/common/hadoop-1.2.1/hadoop_1.2.1-1_x86_64.deb
     rpmurl: http://www.nic.funet.fi/pub/mirrors/apache.org/hadoop/common/hadoop-1.2.1/hadoop-1.2.1-1.x86_64.rpm

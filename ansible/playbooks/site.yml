@@ -7,22 +7,22 @@
 # 
 
 # common stuff for all groups
-- include: roles/common.yml
+- import_playbook: roles/common.yml
 
 # common setup for master - slave
-- include: roles/cluster.yml
+- import_playbook: roles/cluster.yml
 
 # ALICE stuff (has be done before the gridengine stuff)
-- include: roles/alicefy.yml
+- import_playbook: roles/alicefy.yml
 
 # ganglia for monitoring
-- include: roles/ganglia.yml
+- import_playbook: roles/ganglia.yml
 
 # SLURM for batch prosessing
-- include: roles/slurm.yml
+- import_playbook: roles/slurm.yml
 
 # Hadoop/HDFS for map reduce and distributed filesystem
-- include: roles/hadoop.yml
+- import_playbook: roles/hadoop.yml
 
 # Spark for next gen map reduce, runs on HDFS
-- include: roles/spark.yml
+- import_playbook: roles/spark.yml

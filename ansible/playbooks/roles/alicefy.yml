@@ -17,6 +17,12 @@
     - typestat.py
     - typestatsum.py
 
+- name: Localhost-stuff
+  hosts: localhost
+  tasks:
+
+  - name: Find IP
+    shell: ifconfig eth0 | awk '/inet /{print $2}' > admin_ip
 
 - name: Some generic stuff
   hosts: all
@@ -32,11 +38,28 @@
       - ~/.ssh/id_rsa.pub
       - ~/.ssh/cpouta_key.pub
 
+  - name: Copy localhost IP
+    copy:
+      src: admin_ip
+      dest: admin_ip
+
+  - name: Read admin_ip
+    command: cat admin_ip
+    register: admin_ip
+
+  - name: hostvars
+    debug:
+      var: admin_ip.stdout
+
   - name: Config. yum to use a proxy
-    ini_file: dest=/etc/yum.conf section=main option=proxy value="http://192.168.82.60:3128"
+    ini_file:
+      dest: /etc/yum.conf
+      section: main
+      option: proxy
+      value: "http://{{ admin_ip.stdout }}:3128"
 
   - name: Install the HEP_OSlibs
-    yum: name=http://linuxsoft.cern.ch/wlcg/sl6/x86_64/HEP_OSlibs_SL6-1.0.16-0.el6.x86_64.rpm
+    yum: name=https://linuxsoft.cern.ch/wlcg/sl6/x86_64/HEP_OSlibs_SL6-1.1.11-2.el6.x86_64.rpm
 
   - name: Set the timezone; Edit /etc/sysconfig/clock
     lineinfile:
@@ -198,10 +221,11 @@
     get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/RPM-GPG-KEY-CernVM  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-CernVM
 
   - name: Install CVMFS
-    yum: name="{{ item }}" state=latest
-    with_items:
-    - cvmfs
-    - cvmfs-init-scripts
+    yum:
+      state: latest
+      name:
+      - cvmfs
+      - cvmfs-init-scripts
 
   - name: Configure CVMFS
     template: src=alicefiles/cvmfs-default.j2 dest=/etc/cvmfs/default.local 

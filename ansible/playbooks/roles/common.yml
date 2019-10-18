@@ -1,9 +1,9 @@
 ---
 - name: Common setup
   hosts: common
-  sudo: yes
+  become: yes
   tasks: 
-    - include: common/tasks/deb.yml
+    #- include: common/tasks/deb.yml
     - include: common/tasks/epel_repo.yml
     - include: common/tasks/packages.yml
     - include: common/tasks/hosts.yml hosts="{{ groups.all }}"

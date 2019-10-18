@@ -14,31 +14,32 @@
 
 - name: install nfs client (CentOS)
   yum: name=nfs-utils state=present
-  when: is_centos
   tags:
     - nfs
 
 - name: Ensure rpcbind is running (CentOS)
   action: service name=rpcbind state=started enabled=yes
-  when: is_centos
-
-- name: Ensure rpcbind is running (Debian)
-  action: service name=rpcbind state=started enabled=yes
-  when: is_debian
 
 - name: Ensure {{nfsmount}} directory exists
-  action: file path={{nfsmount}} state=directory
+  file:
+    path: "{{nfsmount}}"
+    state: directory
   tags: 
     - nfs
 
 - shell: if [ -z "$nfsoptions" ]; then  echo rw,sync,nfsvers=4; else echo $nfsoptions; fi
   register: _nfsopts
-  sudo: false
+  become: false
   connection: local
   tags:
     - nfs
 
 - name: configure /etc/fstab on clients
-  action: mount name={{nfsmount}} src={{nfsserver}}:{{nfspath}} fstype=nfs opts={{_nfsopts.stdout}} state=mounted
+  mount:
+    name: "{{nfsmount}}"
+    src: "{{nfsserver}}:{{nfspath}}"
+    fstype: nfs
+    opts: "{{_nfsopts.stdout}}"
+    state: mounted
   tags:
     - nfs
