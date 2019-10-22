@@ -93,30 +93,7 @@ Note: Here we assume that you are already past the basic steps mentioned above.
 Create a small management VM to act as an admin node and Squid proxy server
 (for CVMFS)
 
-* Log into https://pouta.csc.fi
-* If you are member of multiple projects, select the desired one from the drop down list on top left
-* Create a new security group called, for example, 'admin'
-
-  - go to *Access and Security -> Security groups -> Create Security Group*
-  - add rules to allow ssh for yourself and other admins
-  - normal users do not need to access this hosts
-  - keep the access list as small as possible to minimize exposure
-
-* Create an access key if you don't already have one
-
-  - go to *Access and Security -> Keypairs -> Create/Import Keypair*
-
-* Boot a new VM
-
-  - go to *Instances -> Launch Instance*
-  - Image: Latest CentOS-7
-  - Flavor: standard.small (or maybe even standard.tiny?)
-  - Keypair: select your key
-  - Security Groups: select only *bastion*
-  - Network: select the desired network (you probably only have one, which is the default and ok)
-  - Launch
-
-* Associate a floating IP (allocate one for the project if you don't already have a spare)
+* Edit admin/group_vars/all.yml
 
 * Run the ansible playbook in admin/setup-admin.yml.
 

@@ -31,8 +31,8 @@
       name: admin
       image: CentOS-7
       flavor: standard.tiny
-      network: project_2001054
-      key_name: eriknew
+      network: "{{ network }}"
+      key_name: "{{ key }}"
       security_groups: bastion
     until: (bastion_result.openstack is defined) and (bastion_result.openstack.addresses.values()[0] | length > 1)
     delay: 20
