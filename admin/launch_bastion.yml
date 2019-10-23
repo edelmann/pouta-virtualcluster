@@ -60,3 +60,17 @@
     template:
         src: templates/hosts.j2
         dest: ./hosts
+
+  - name: clear ssh known_hosts
+    known_hosts:
+      name: "{{ bastion_floating_ip }}"
+      state: absent
+    when: bastion_result is changed and bastion_floating_ip is defined
+
+  - name: Wait for instances to be ready
+    wait_for:
+      host: "{{ bastion_floating_ip }}"
+      port: 22
+      search_regex: OpenSSH
+      delay: 15
+
