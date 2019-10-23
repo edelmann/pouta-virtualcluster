@@ -6,7 +6,6 @@ cluster:
   server-group-policy: none
   allow-traffic-from-sec-groups:
     - bastion
-    #- VOBox
   int-secgroup-rules:
     - tcp 1    65536 0.0.0.0/0
     - udp 1    65536 0.0.0.0/0
@@ -31,7 +30,7 @@ cluster:
   
 
 frontend:
-  sec-key: cluster-key
+  sec-key: {{ clusterkey }}
   image: CentOS-7
   admin-user: cloud-user
   flavor: standard.tiny
@@ -45,7 +44,7 @@ frontend:
     - cvmfs
 
 node:
-  sec-key: cluster-key
+  sec-key: {{ clusterkey }}
   image: CentOS-7
   admin-user: cloud-user
   #flavor: hpc-gen2.24core   # If this ever changes, the HEPSPEC06 benchmark has to be rerun.

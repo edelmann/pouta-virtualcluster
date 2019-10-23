@@ -1,3 +1,8 @@
 ---
-key: eriknew
+# Key used with the admin node
+adminkey: eriknew
+
+# Key used with the cluster
+clusterkey: eriknew  # cluster-key
+
 network: project_2001054

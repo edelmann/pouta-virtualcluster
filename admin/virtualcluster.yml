@@ -71,3 +71,9 @@
     template:
       src: cluster.yml.j2
       dest: ~/alice-cluster/cluster.yml
+
+  - name: Copy my_ip script
+    copy:
+      src: templates/my_ip
+      dest: ~/bin/my_ip
+      mode: 0755

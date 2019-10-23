@@ -32,7 +32,7 @@
       image: CentOS-7
       flavor: standard.tiny
       network: "{{ network }}"
-      key_name: "{{ key }}"
+      key_name: "{{ adminkey }}"
       security_groups: bastion
     until: (bastion_result.openstack is defined) and (bastion_result.openstack.addresses.values()[0] | length > 1)
     delay: 20
