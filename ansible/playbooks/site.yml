@@ -16,7 +16,7 @@
 - import_playbook: roles/alicefy.yml
 
 # ganglia for monitoring
-- import_playbook: roles/ganglia.yml
+#- import_playbook: roles/ganglia.yml
 
 # SLURM for batch prosessing
 - import_playbook: roles/slurm.yml

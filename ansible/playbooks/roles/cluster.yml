@@ -51,7 +51,8 @@
   name: Common cluster preparation
   become: yes
   tasks:
-    - include: common/tasks/iptables.yml trusted_hosts="{{ groups.all }}" default_accept=1
+    # Do we really need the iptables stuff? Isn't that what the security groups are for?
+    #- include: common/tasks/iptables.yml trusted_hosts="{{ groups.all }}" default_accept=1
 
     - name: make sure local_data_dir exists
       file:

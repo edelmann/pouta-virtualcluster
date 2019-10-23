@@ -11,25 +11,21 @@
 - name: Setup SSH host based authentication (server configuration file; enable `HostbasedAuthentication` option)
   action: lineinfile dest=/etc/ssh/sshd_config regexp='HostbasedAuthentication.*' line="HostbasedAuthentication yes"
   notify:
-    - restart ssh
     - restart sshd
 
 - name: Setup SSH host based authentication (server configuration file; disable `IgnoreRhosts` option)
   action: lineinfile dest=/etc/ssh/sshd_config regexp='IgnoreRhosts.*' line="IgnoreRhosts no"
   notify:
-    - restart ssh
     - restart sshd
 
 - name: Setup SSH host based authentication (server configuration file; enable `HostbasedUsesNameFromPacketOnly` option)
   action: lineinfile dest=/etc/ssh/sshd_config regexp='HostbasedUsesNameFromPacketOnly.*' line="HostbasedUsesNameFromPacketOnly yes"
   notify:
-    - restart ssh
     - restart sshd
 
 - name: Setup SSH host based authentication (server configuration file; remove `HostKey /etc/ssh/ssh_host_ed25519_key` option)
   action: lineinfile dest=/etc/ssh/sshd_config regexp='HostKey /etc/ssh/ssh_host_ed25519_key' line="#HostKey /etc/ssh/ssh_host_ed25519_key"
   notify:
-    - restart ssh
     - restart sshd
 
 
