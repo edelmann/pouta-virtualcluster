@@ -1,0 +1,32 @@
+---
+- name: Create a swap file
+  become: yes
+  hosts: all
+  vars:
+    swapfile: '/swapfile'
+    swapsize: 1G
+  tasks:
+
+  - name: Check if the swapfile is already enabled
+    command: grep {{ swapfile }} /proc/swaps
+    register: swap_found
+    ignore_errors: True
+
+  - name: Create swapfile
+    command: fallocate -l {{ swapsize }} {{ swapfile }} creates={{ swapfile }}
+    when: swap_found is failed
+
+  - name: Format swapfile
+    command: mkswap {{ swapfile }}
+    when: swap_found is failed
+
+  - name: Set permissions for swapfile
+    file: path={{ swapfile }} owner=root group=root mode=0600
+
+  - name: Run swapon
+    command: swapon {{ swapfile }}
+    when: swap_found is failed
+
+  - name: Put the swapfile into /etc/fstab
+    mount: name=swap src={{ swapfile }} fstype=swap opts=sw passno=0 dump=0 state=present
+
