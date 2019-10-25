@@ -27,7 +27,8 @@
   tags: 
     - nfs
 
-- shell: if [ -z "$nfsoptions" ]; then  echo rw,sync,nfsvers=4; else echo $nfsoptions; fi
+- name: Set nfsopts
+  shell: if [ -z "$nfsoptions" ]; then  echo rw,sync,nfsvers=4; else echo $nfsoptions; fi
   register: _nfsopts
   become: false
   connection: local

@@ -1,4 +1,3 @@
 ---
 dependencies:
-  - { role: munge-fe }
   - { role: mariadb }

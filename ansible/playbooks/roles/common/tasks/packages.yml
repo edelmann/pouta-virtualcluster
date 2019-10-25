@@ -1,4 +1,11 @@
 ---
+- name: Config. yum to use a proxy
+  ini_file:
+    dest: /etc/yum.conf
+    section: main
+    option: proxy
+    value: "http://{{ lookup('pipe', 'my_ip') }}:3128"
+
 - name: update the system (CentOS)
   yum: name=* state=latest
 

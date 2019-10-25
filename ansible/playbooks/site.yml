@@ -22,7 +22,7 @@
 - import_playbook: roles/slurm.yml
 
 # Hadoop/HDFS for map reduce and distributed filesystem
-- import_playbook: roles/hadoop.yml
+#- import_playbook: roles/hadoop.yml
 
 # Spark for next gen map reduce, runs on HDFS
-- import_playbook: roles/spark.yml
+#- import_playbook: roles/spark.yml

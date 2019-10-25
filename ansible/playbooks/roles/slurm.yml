@@ -1,18 +1,26 @@
 ---
+- name: Munge
+  hosts: all
+  roles:
+    - munge-common
+    - munge-fe
+
+- name: Download & Compile SLURM
+  hosts: frontend
+  roles:
+    - slurm-compile
+
 - name: Common configuration
   hosts: frontend:node
-  become: yes
   roles:
     - slurm-common
 
-- name: GridEngine masternode play
+- name: Slurm masternode play
   hosts: frontend
-  become: yes
   roles:
     - slurm-fe
 
-- name: GridEngine worker nodes play
+- name: Slurm worker nodes play
   hosts: node
-  become: yes
   roles:
     - slurm-wn
