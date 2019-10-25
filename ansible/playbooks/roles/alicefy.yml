@@ -84,7 +84,7 @@
     become: yes
 
   - name: Create the ssh dir.
-    file: dest=~aliprod/.ssh/ mode=700 state=directory
+    file: dest=~aliprod/.ssh/ mode=0700 state=directory
     become: yes
     become_user: aliprod
 
