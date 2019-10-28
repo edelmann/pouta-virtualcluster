@@ -25,4 +25,4 @@
   service: 
     name: slurmctld
     enabled: yes
-    state: started
+    state: restarted

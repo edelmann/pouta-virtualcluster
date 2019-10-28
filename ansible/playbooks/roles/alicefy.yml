@@ -77,10 +77,13 @@
     become: yes
 
   - name: Create the ssh dir.
-    file: dest=~aliprod/.ssh/ mode=0700 state=directory
     become: yes
     become_user: aliprod
-
+    file:
+      dest: ~aliprod/.ssh/
+      mode: 0700
+      owner: aliprod
+      state: directory
 
 #  - name: Copy public ssh key for aliprod
 #    lineinfile:
@@ -165,8 +168,8 @@
   - name: Copy the stray process searching script
     copy: src=alicefiles/seek_stray.py dest=/usr/local/bin/seek_stray mode=755
 
-  - name: Add a crontab entry to kill stray processes
-    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="Kill stray processes"
+#  - name: Add a crontab entry to kill stray processes
+#    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="Kill stray processes"
 
 
 - name:  Install and set up CVMFS
