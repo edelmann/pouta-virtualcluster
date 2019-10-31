@@ -2,7 +2,25 @@
 # Key used with the admin node
 adminkey: eriknew
 
-# Key used with the cluster
-clusterkey: eriknew  # cluster-key
+# Flavor of the Bastion/admin node
+admin_flavor:  standard.small
 
-network: project_2001054
+# Image (OS) if the admin node
+admin_image: CentOS-7
+
+# Key used with the cluster
+clusterkey: cluster-key
+
+# Flavor of the cluster frontend
+frontend_flavor: standard.tiny
+frontend_image: CentOS-7
+
+# Flavor of the cluster worker nodes
+wn_flavor: hpc-gen2.24core
+#wn_flavor: standard.small
+wn_image: CentOS-7
+
+# Worker node local disk
+wn_local_disk: 120
+
+network: dojkim

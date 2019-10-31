@@ -29,8 +29,8 @@
     register: bastion_result
     os_server:
       name: admin
-      image: CentOS-7
-      flavor: standard.tiny
+      image: "{{ admin_image }}"
+      flavor: "{{ admin_flavor }}"
       network: "{{ network }}"
       key_name: "{{ adminkey }}"
       security_groups: bastion
