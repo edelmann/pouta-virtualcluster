@@ -55,4 +55,4 @@ JobAcctGatherType=jobacct_gather/linux
 NodeName={{ host }} NodeAddr={{ hostvars[host]["ansible_ssh_host"] }} CPUs={{ hostvars[host]['ansible_facts']['processor_vcpus'] }} State=UNKNOWN
 {% endif %}
 {% endfor %}
-PartitionName=debug Nodes=ALL Default=YES MaxTime=INFINITE State=UP
+PartitionName=alice Nodes=ALL Default=YES MaxTime=INFINITE State=UP

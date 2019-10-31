@@ -148,7 +148,11 @@
     file: src=~aliprod/.globus dest=~aliprod/.alien/globus state=link
 
   - name: Set PATH for aliprod
-    lineinfile: line="export PATH=$HOME/bin:$PATH:/cvmfs/alice.cern.ch/bin/"  dest=~aliprod/.bashrc  state=present
+    lineinfile:
+      line: "export PATH=$HOME/bin:$PATH:/cvmfs/alice.cern.ch/bin/"
+      dest: ~aliprod/.bashrc
+      state: present
+      create: yes
 
   - name: Set TMPDIR
     lineinfile: line="export TMPDIR=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
