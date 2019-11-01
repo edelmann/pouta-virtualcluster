@@ -11,46 +11,32 @@
     yum: name=numpy state=present
 
   - name: Copy a few scripts
-    copy: src=alicefiles/{{ item }} dest=/usr/local/bin/{{ item }} mode=755
+    copy:
+      src: "alicefiles/{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      mode: 0755
     with_items:
-    - qstatsummary
+    - sq
     - typestat.py
     - typestatsum.py
-
 
 - name: Some generic stuff
   hosts: all
   become: yes
   tasks:
 
-  - name: Copy public ssh key for cloud-user
+  - name: Add local .ssh/*.pub files to auhtorized_keys for cloud-user
     lineinfile:
       dest: ~cloud-user/.ssh/authorized_keys
       line: "{{ item }}"
       create: yes
-    with_file:
-      - ~/.ssh/id_rsa.pub
-      - ~/.ssh/cpouta_key.pub
-
-  - name: Config. yum to use a proxy
-    ini_file: dest=/etc/yum.conf section=main option=proxy value="http://192.168.82.60:3128"
+    with_lines: cat ~/.ssh/*.pub
 
   - name: Install the HEP_OSlibs
-    yum: name=http://linuxsoft.cern.ch/wlcg/sl6/x86_64/HEP_OSlibs_SL6-1.0.16-0.el6.x86_64.rpm
+    yum: name=https://linuxsoft.cern.ch/wlcg/centos7/x86_64/HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
 
   - name: Set the timezone; Edit /etc/sysconfig/clock
-    lineinfile:
-      dest=/etc/sysconfig/clock
-      line="ZONE=Europe/Helsinki"
-      regexp="ZONE="
-      state=present
-
-  - name: Set the timezone; Point /etc/localtime to the correct place
-    file:
-      path=/etc/localtime
-      src=/usr/share/zoneinfo/Europe/Helsinki
-      state=link
-      force=yes
+    timezone: name=Europe/Helsinki
 
 
 - name: Create a swap file
@@ -68,18 +54,18 @@
 
   - name: Create swapfile
     command: fallocate -l {{ swapsize }} {{ swapfile }} creates={{ swapfile }}
-    when: swap_found|failed
+    when: swap_found is failed
 
   - name: Format swapfile
     command: mkswap {{ swapfile }}
-    when: swap_found|failed
+    when: swap_found is failed
 
   - name: Set permissions for swapfile
     file: path={{ swapfile }} owner=root group=root mode=0600
 
   - name: Run swapon
     command: swapon {{ swapfile }}
-    when: swap_found|failed
+    when: swap_found is failed
 
   - name: Put the swapfile into /etc/fstab
     mount: name=swap src={{ swapfile }} fstype=swap opts=sw passno=0 dump=0 state=present
@@ -94,21 +80,24 @@
     become: yes
 
   - name: Create the ssh dir.
-    file: dest=~aliprod/.ssh/ mode=700 state=directory
     become: yes
     become_user: aliprod
+    file:
+      dest: ~aliprod/.ssh/
+      mode: 0700
+      owner: aliprod
+      state: directory
 
-
-  - name: Copy public ssh key for aliprod
-    lineinfile:
-      dest: ~aliprod/.ssh/authorized_keys
-      line: "{{ item }}"
-      create: yes
-    with_file:
-      - ~/.ssh/id_rsa.pub
-      - ~/.ssh/cpouta_key.pub
-    become: yes
-    become_user: aliprod
+#  - name: Copy public ssh key for aliprod
+#    lineinfile:
+#      dest: ~aliprod/.ssh/authorized_keys
+#      line: "{{ item }}"
+#      create: yes
+#    with_file:
+#      - ~/.ssh/id_rsa.pub
+#      - ~/.ssh/cpouta_key.pub
+#    become: yes
+#    become_user: aliprod
 
   - name: Create dir for aliprod in /mnt/shared_data
     file: dest=/mnt/shared_data/aliprod state=directory owner=aliprod
@@ -122,7 +111,7 @@
   - name: Create /mnt/tmp if it doesn't exist
     file:  path=/mnt/tmp state=directory mode=777
     become: yes
-    when: mnt_tmp_exists|failed
+    when: mnt_tmp_exists is failed
 
   - name: Create a .libnetrc
     copy: src=alicefiles/libnetrc dest=~aliprod/.libnetrc
@@ -162,7 +151,11 @@
     file: src=~aliprod/.globus dest=~aliprod/.alien/globus state=link
 
   - name: Set PATH for aliprod
-    lineinfile: line="export PATH=$HOME/bin:$PATH:/cvmfs/alice.cern.ch/bin/"  dest=~aliprod/.bashrc  state=present
+    lineinfile:
+      line: "export PATH=$HOME/bin:$PATH:/cvmfs/alice.cern.ch/bin/"
+      dest: ~aliprod/.bashrc
+      state: present
+      create: yes
 
   - name: Set TMPDIR
     lineinfile: line="export TMPDIR=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
@@ -182,8 +175,8 @@
   - name: Copy the stray process searching script
     copy: src=alicefiles/seek_stray.py dest=/usr/local/bin/seek_stray mode=755
 
-  - name: Add a crontab entry to kill stray processes
-    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="Kill stray processes"
+#  - name: Add a crontab entry to kill stray processes
+#    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="Kill stray processes"
 
 
 - name:  Install and set up CVMFS
@@ -198,10 +191,11 @@
     get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/RPM-GPG-KEY-CernVM  dest=/etc/pki/rpm-gpg/RPM-GPG-KEY-CernVM
 
   - name: Install CVMFS
-    yum: name="{{ item }}" state=latest
-    with_items:
-    - cvmfs
-    - cvmfs-init-scripts
+    yum:
+      state: latest
+      name:
+      - cvmfs
+      - cvmfs-init-scripts
 
   - name: Configure CVMFS
     template: src=alicefiles/cvmfs-default.j2 dest=/etc/cvmfs/default.local 

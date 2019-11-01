@@ -63,5 +63,17 @@
   - name: Create a alice-cluster dir
     file: dest=~/alice-cluster state=directory
 
+  #- name: blah
+    #debug:
+      #var: hostvars
+
   - name: Copy the cluster.yml file
-    copy: src=templates/cluster.yml dest=~/alice-cluster/cluster.yml
+    template:
+      src: cluster.yml.j2
+      dest: ~/alice-cluster/cluster.yml
+
+  - name: Copy my_ip script
+    copy:
+      src: templates/my_ip
+      dest: ~/bin/my_ip
+      mode: 0755

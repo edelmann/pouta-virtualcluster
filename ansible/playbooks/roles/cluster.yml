@@ -1,7 +1,7 @@
 ---
 - hosts: cluster_master
   name: Cluster master preparation
-  sudo: yes
+  become: yes
   tasks:
 
     - include: common/tasks/nfs.yml
@@ -11,21 +11,26 @@
       when: shared_data_device is defined
 
     - name: make sure shared_data_dir exists
-      file: path="{{ shared_data_dir }}" state=directory
+      file:
+        path: "{{ shared_data_dir }}"
+        state: directory
 
     - name: mount shared data
       mount: name={{ shared_data_dir }} src='LABEL=shared' state=mounted opts=defaults fstype=ext4
       when: shared_data_device is defined
       notify:
         - restart nfsd
-        - restart nfs-kernel-server
+        #- restart nfs-kernel-server
 
     - name: export shared data
-      nfsexport: path={{ shared_data_dir }} dest=/etc/exports clients="{{ groups.cluster_slave }}"
-                 options=rw,no_root_squash,async
+      nfsexport:
+        path: "{{ shared_data_dir }}"
+        dest: /etc/exports
+        clients: "{{ groups.cluster_slave }}"
+        options: rw,no_root_squash,async
       notify:
         - restart nfsd
-        - restart nfs-kernel-server
+        #- restart nfs-kernel-server
 
     #- name: export home
     #  nfsexport: path=/home dest=/etc/exports clients="{{ groups.cluster_slave }}" options=rw,no_root_squash,sync
@@ -35,7 +40,6 @@
 
     - name: install pdsh
       yum: name=pdsh state=present
-      when: is_centos
 
     - name: set pdsh default transport to ssh
       lineinfile: name=/etc/pdsh/rcmd_default create=yes line='ssh' state=present
@@ -45,15 +49,21 @@
 
 - hosts: cluster_master:cluster_slave
   name: Common cluster preparation
-  sudo: yes
+  become: yes
   tasks:
-    - include: common/tasks/iptables.yml trusted_hosts="{{ groups.all }}" default_accept=1
+    # Do we really need the iptables stuff? Isn't that what the security groups are for?
+    #- include: common/tasks/iptables.yml trusted_hosts="{{ groups.all }}" default_accept=1
 
     - name: make sure local_data_dir exists
-      file: path="{{ local_data_dir }}" state=directory
+      file:
+        path: "{{ local_data_dir }}"
+        state: directory
 
     - name: format local data
-      filesystem: fstype=ext4 dev={{ local_data_device }} opts="-L data -m 0"
+      filesystem:
+        fstype: ext4
+        dev: "{{ local_data_device }}"
+        opts: "-L data -m 0"
       when: local_data_device is defined
       ignore_errors: true
 
@@ -63,14 +73,16 @@
       ignore_errors: true
 
     - name: Set permissions for the local data dir
-      file: path="{{ local_data_dir }}"  mode=0777
+      file:
+        path: "{{ local_data_dir }}"
+        mode: 0777
 
   handlers:
     - include: common/handlers/main.yml
 
 - hosts: cluster_slave
   name: Cluster slave preparation
-  sudo: yes
+  become: yes
   tasks:
     #- include: common/tasks/nfs-clients.yml nfsserver="{{ groups.cluster_master[0] }}" nfspath=/home nfsmount=/home
     - include: common/tasks/nfs-clients.yml nfsserver="{{ groups.cluster_master[0] }}" nfspath={{ shared_data_dir }}

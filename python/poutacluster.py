@@ -92,7 +92,7 @@ class Cluster(object):
             ip = spec['public-ip']
             print "    associating public IP %s" % ip
             fip = oaw.associate_floating_address(self.nova_client, instance, ip)
-            print "    associated public IP %s" % fip.ip
+            print "    associated public IP %s" % fip['Floating IP Address']
 
     def __provision_volumes(self, instance, volspec):
         vd = chr(ord('c'))
@@ -108,7 +108,7 @@ class Cluster(object):
             # check if there is already a volume or do we need to create one
             ex_vol = None
             for vol in self.volumes:
-                if vol.display_name == vol_name:
+                if vol.name == vol_name:
                     ex_vol = vol
                     break
             if ex_vol:
@@ -117,7 +117,7 @@ class Cluster(object):
                     print "    volume %s already attached" % vol_name
                 else:
                     print "    attaching existing volume %s with size %s as device %s" % (
-                        ex_vol.display_name, ex_vol.size, device)
+                        ex_vol.name, ex_vol.size, device)
                     oaw.attach_volume(self.nova_client, self.cinder_client, instance, ex_vol, device, async=True)
 
             else:
@@ -140,9 +140,9 @@ class Cluster(object):
             print
             print '      or through the web interface'
             print
-            sg = oaw.create_sec_group(self.nova_client, sg_name_ext,
-                                      'Security group for %s external access' % self.name)
-            self.__prov_log('create', 'sec-group', sg.id, sg.name)
+            sg_id, sg_name = oaw.create_sec_group(self.nova_client, sg_name_ext,
+                                                 'Security group for %s external access' % self.name)
+            self.__prov_log('create', 'sec-group', sg_id, sg_name)
 
             # add user configured rules (override the cluster config rules with custom_ext_rules if provided)
             ext_rules = []
@@ -154,7 +154,7 @@ class Cluster(object):
             for rule in ext_rules:
                 print "    adding rule '%s'" % rule
                 proto, from_port, to_port, cidr = rule.strip().split()
-                oaw.add_sec_group_rule(self.nova_client, sg.id, ip_protocol=proto, from_port=from_port,
+                oaw.add_sec_group_rule(self.nova_client, sg_id, ip_protocol=proto, from_port=from_port,
                                        to_port=to_port, cidr=cidr)
 
     def _provision_int_sec_group(self):
@@ -164,9 +164,9 @@ class Cluster(object):
         except RuntimeError:
             print
             print '    No security group for internal access exists, creating it'
-            sg = oaw.create_sec_group(self.nova_client, sg_name_int,
-                                      'Security group for %s internal access' % self.name)
-            self.__prov_log('create', 'sec-group', sg.id, sg.name)
+            sg_id, sg_name = oaw.create_sec_group(self.nova_client, sg_name_int,
+                                                  'Security group for %s internal access' % self.name)
+            self.__prov_log('create', 'sec-group', sg_id, sg_name)
 
             # add intra-cluster access
             oaw.create_local_access_rules(self.nova_client, sg_name_int, sg_name_int)
@@ -300,8 +300,8 @@ class Cluster(object):
     @staticmethod
     def __filter_volumes_for_node(volumes, vm_name):
         return [x for x in volumes
-                if x.display_name
-                and x.display_name.startswith('%s/' % vm_name)
+                if x.name
+                and x.name.startswith('%s/' % vm_name)
                 and x.status in ['in-use', 'available']]
 
     def get_volumes_for_node(self, vm_name):
@@ -336,7 +336,7 @@ class Cluster(object):
         # find volumes created for the frontend
         fe_vols = self.__filter_volumes_for_node(all_vols, fe_name)
         for vol in fe_vols:
-            print "    found volume %s" % vol.display_name
+            print "    found volume %s" % vol.name
         self.volumes.extend(fe_vols)
 
         # find cluster nodes
@@ -354,7 +354,7 @@ class Cluster(object):
             # find volumes created for the node
             node_vols = self.__filter_volumes_for_node(all_vols, node_name)
             for vol in node_vols:
-                print "    found volume %s" % vol.display_name
+                print "    found volume %s" % vol.name
 
             self.volumes.extend(node_vols)
 
@@ -384,9 +384,9 @@ class Cluster(object):
             print "Checking volume attach state"
             for node in self.nodes:
                 for vol in self.volumes:
-                    if not vol.display_name.startswith(node.name + '/'):
+                    if not vol.name.startswith(node.name + '/'):
                         continue
-                    print "    %s" % vol.display_name
+                    print "    %s" % vol.name
                     oaw.wait_for_state(self.cinder_client, 'volumes', vol.id, 'in-use')
                     print
 
@@ -400,9 +400,9 @@ class Cluster(object):
         print "Checking volume attach state"
         for node in new_nodes:
             for vol in self.volumes:
-                if not vol.display_name.startswith(node.name + '/'):
+                if not vol.name.startswith(node.name + '/'):
                     continue
-                print "    %s" % vol.display_name
+                print "    %s" % vol.name
                 oaw.wait_for_state(self.cinder_client, 'volumes', vol.id, 'in-use')
                 print
 
@@ -463,9 +463,9 @@ class Cluster(object):
 
         # delete volumes in reverse order, frontend last
         for vol in self.volumes[::-1]:
-            print "Deleting volume %s %s" % (vol.id, vol.display_name)
+            print "Deleting volume %s %s" % (vol.id, vol.name)
             oaw.delete_volume_by_id(self.cinder_client, vol.id, True)
-            self.__prov_log('delete', 'volume', vol.id, vol.display_name)
+            self.__prov_log('delete', 'volume', vol.id, vol.name)
 
     def cleanup(self):
         print "Cleaning server and security groups"
@@ -528,7 +528,7 @@ class Cluster(object):
             res.append(template % ('image', oaw.find_image_name_by_id(self.nova_client, vm.image['id'])))
             res.append('%014s:' % 'volumes')
             for vol in self.get_volumes_for_node(vm.name):
-                res.append('%s %s - %sGB' % (' ' * 10, vol.display_name, vol.size))
+                res.append('%s %s - %sGB' % (' ' * 10, vol.name, vol.size))
             res.append(' ')
 
         res.append('Frontend:')
@@ -624,7 +624,7 @@ class Cluster(object):
         lines.append('')
 
         lines.append('[all:vars]')
-        lines.append('local_data_dir=/mnt/cache')
+        lines.append('local_data_dir=/mnt/tmp')
         lines.append('shared_data_dir=/mnt/shared_data')
 
         return lines
@@ -702,7 +702,7 @@ def run_bootstrap(hosts=[]):
     if os.path.isfile('key.priv'):
         cmd += ' --private-key key.priv'
     if hosts:
-        cmd += " --limit=%s" % ";".join(hosts)
+        cmd += " --limit=%s" % ",".join(hosts)
     print cmd
     res = subprocess.call(shlex.split(cmd))
     if res:

@@ -1,7 +1,7 @@
 ---
 - hosts: spark_master:spark_slave
   name: Install Spark
-  sudo: yes
+  become: yes
   vars:
     spark_version: "1.3.1"
     spark_flavor: "hadoop1"

@@ -17,11 +17,9 @@
 
 - name: Install iptables package (CentOS)
   yum: name=iptables
-  when: is_centos
   tags: iptables
 
 - action: set_fact destfile=/etc/sysconfig/iptables
-  when: is_centos
   tags: iptables
 
 - action: set_fact default_policy=ACCEPT
@@ -36,5 +34,5 @@
   when: is_docker_container is not defined
   notify:
     - restart iptables
-    - restart iptables-persistent
+    #- restart iptables-persistent
   tags: iptables

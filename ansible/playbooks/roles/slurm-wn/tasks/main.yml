@@ -1,0 +1,30 @@
+---
+- name: Copy cgroup.conf
+  become: yes
+  copy:
+    src: cgroup.conf
+    dest: /etc/slurm/cgroup.conf
+
+- name: Create /var/spool/slurmd
+  become: yes
+  file:
+    path: /var/spool/slurmd
+    owner: slurm
+    group: slurm
+    mode: 0755
+    state: directory
+
+- name: Touch the log file
+  become: yes
+  file:
+    path: /var/log/slurmd.log
+    owner: slurm
+    group: slurm
+    state: touch
+
+- name: Enable & start slurmd
+  become: yes
+  service: 
+    name: slurmd
+    enabled: yes
+    state: started

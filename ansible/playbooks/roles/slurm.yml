@@ -1,0 +1,26 @@
+---
+- name: Munge
+  hosts: all
+  roles:
+    - munge-common
+    - munge-fe
+
+- name: Download & Compile SLURM
+  hosts: frontend
+  roles:
+    - slurm-compile
+
+- name: Common configuration
+  hosts: frontend:node
+  roles:
+    - slurm-common
+
+- name: Slurm masternode play
+  hosts: frontend
+  roles:
+    - slurm-fe
+
+- name: Slurm worker nodes play
+  hosts: node
+  roles:
+    - slurm-wn

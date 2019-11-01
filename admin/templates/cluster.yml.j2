@@ -2,11 +2,10 @@
 cluster:
   name: alice
   description: An ALICE Cluster
-  network: dojkim
+  network: {{ network }}
   server-group-policy: none
   allow-traffic-from-sec-groups:
     - bastion
-    #- VOBox
   int-secgroup-rules:
     - tcp 1    65536 0.0.0.0/0
     - udp 1    65536 0.0.0.0/0
@@ -31,30 +30,29 @@ cluster:
   
 
 frontend:
-  sec-key: cluster-key
-  image: CentOS-6.6
+  sec-key: {{ clusterkey }}
+  image: {{ frontend_image }}
   admin-user: cloud-user
-  flavor: standard.tiny
-  public-ip: 86.50.169.219
+  flavor: {{ frontend_flavor }}
+  #public-ip: 86.50.169.219
   volumes:
     - name: shared_data
       size: 10
   groups:
     - common
     - cluster_master
-    - ge_master
     - cvmfs
 
 node:
-  sec-key: cluster-key
-  image: CentOS-6.6
+  sec-key: {{ clusterkey }}
+  image: {{ wn_image }}
   admin-user: cloud-user
-  flavor: hpc-gen1.8core   # If this ever changes, the HEPSPEC06 benchmark has to be rerun.
+  #flavor: hpc-gen2.24core   # If this ever changes, the HEPSPEC06 benchmark has to be rerun.
+  flavor: {{ wn_flavor }}
   volumes:
     - name: local_data
-      size: 100
+      size: {{ wn_local_disk }}
   groups:
     - common
     - cluster_slave
-    - ge_slave
     - cvmfs

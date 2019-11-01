@@ -1,0 +1,3 @@
+#!/bin/bash
+
+squeue | awk '$5 == "R"{n[$8]+=$7;N++}END{for (m in n) print m, n[m]; print "total:       " N}' | sort
