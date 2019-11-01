@@ -11,9 +11,12 @@
     yum: name=numpy state=present
 
   - name: Copy a few scripts
-    copy: src=alicefiles/{{ item }} dest=/usr/local/bin/{{ item }} mode=755
+    copy:
+      src: "alicefiles/{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      mode: 0755
     with_items:
-    - qstatsummary
+    - sq
     - typestat.py
     - typestatsum.py
 

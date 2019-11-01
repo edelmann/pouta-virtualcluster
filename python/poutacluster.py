@@ -702,7 +702,7 @@ def run_bootstrap(hosts=[]):
     if os.path.isfile('key.priv'):
         cmd += ' --private-key key.priv'
     if hosts:
-        cmd += " --limit=%s" % ";".join(hosts)
+        cmd += " --limit=%s" % ",".join(hosts)
     print cmd
     res = subprocess.call(shlex.split(cmd))
     if res:
