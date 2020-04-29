@@ -1,6 +1,8 @@
 ---
 - name: Some generic FE stuff
   hosts: cluster_master
+  vars:
+    hep_oslibs: HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
   become: yes
   tasks:
 
@@ -20,8 +22,15 @@
     - typestat.py
     - typestatsum.py
 
+  - name: Get the HEP OSlibs RPM
+    get_url:
+        url: "https://linuxsoft.cern.ch/wlcg/centos7/x86_64/{{ hep_oslibs }}"
+        dest: "/mnt/shared_data/{{ hep_oslibs }}"
+
 - name: Some generic stuff
   hosts: all
+  vars:
+    hep_oslibs: HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
   become: yes
   tasks:
 
@@ -33,7 +42,8 @@
     with_lines: cat ~/.ssh/*.pub
 
   - name: Install the HEP_OSlibs
-    yum: name=https://linuxsoft.cern.ch/wlcg/centos7/x86_64/HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
+    yum:
+        name: "/mnt/shared_data/{{ hep_oslibs }}"
 
   - name: Set the timezone; Edit /etc/sysconfig/clock
     timezone: name=Europe/Helsinki
