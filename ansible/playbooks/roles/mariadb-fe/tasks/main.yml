@@ -1,0 +1,32 @@
+---
+- name: Install MariaDB
+  yum:
+    name:
+    - 'mariadb' 
+    - 'mariadb-devel'
+    - 'MySQL-python'
+    state: installed
+    disablerepo: openstack-train
+  become: yes
+
+- name: Start & enable the mariadb service
+  become: yes
+  service:
+    name: mariadb
+    enabled: yes
+    state: started
+
+- name: Create a new database with name 'slurm_acct_db'
+  become: yes
+  mysql_db:
+    name: slurm_acct_db
+    state: present
+
+- name: Create db user 'slurm'@'localhost'
+  become: yes
+  mysql_user:
+    name: 'slurm'
+    password: possward
+    priv: 'slurm_acct_db.*:ALL'
+    host: localhost
+    state: present
