@@ -43,6 +43,8 @@
 
     - name: clean yum state (CentOS)
       command: yum clean all
+      args:
+        warn: false
 
     - name: disable SELinux (CentOS)
       action: selinux state=disabled
