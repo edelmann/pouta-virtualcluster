@@ -1,42 +1,30 @@
 ---
-#- name: Install dependencies
-#  become: yes
-#  yum:
-#    state: installed
-#    name:
-#    - openssl
+- name: Install dependencies
+  become: yes
+  yum:
+    state: installed
+    name:
+    - openssl
 #    - openssl-devel
-#    - pam-devel
-#    - numactl
+    - pam-devel
+    - numactl
 #    - numactl-devel
-#    - hwloc
+    - hwloc
 #    - hwloc-devel
-#    - lua
+    - lua
 #    - lua-devel
 #    - readline-devel
 #    - rrdtool-devel
 #    - ncurses-devel
-#    - man2html
-#    - libibmad
-#    - libibumad
+    - man2html
+    - libibmad
+    - libibumad
 #    - rpm-build
 #    - perl-ExtUtils-MakeMaker
 
 #- name: blah
 #  debug:
 #    var: hostvars
-
-- name: Set slurm version
-  set_fact: slurm_version=19.05.3-2
-
-- name: Set root dir for SLURM building
-  set_fact: slurm_build_root=/mnt/shared_data/slurmbuild
-
-- name: Set dir for SLURM building
-  set_fact: slurm_rpmbuild="{{ slurm_build_root }}/rpmbuild"
-
-- name: Set dir for SLURM RPMs
-  set_fact: slurm_rpms="{{ slurm_rpmbuild }}/RPMS/x86_64"
 
 - name: Find Slurm RPMs
   shell: "ls {{ slurm_rpms }}/slurm*.x86_64.rpm"
@@ -55,14 +43,16 @@
     createhome: no
 
 #- name: debug
-  #debug:
-    #var: hostvars['alice-node01']['ansible_facts']
+#  debug:
+#    var: hostvars
 
-- name: Copy slurm.conf
+- name: Copy conf files
   become: yes
   template:
-    src: slurm.conf.j2
-    dest: /etc/slurm/slurm.conf
+    src: "{{ item }}.j2"
+    dest: "/etc/slurm/{{ item }}"
+  with_items:
+  - slurm.conf
 
 - name: Edit systemd/slurm*.service
   become: yes
@@ -75,10 +65,13 @@
   - { path: /usr/lib/systemd/system/slurmctld.service, line: "PIDFile=/var/run/slurm/slurmctld.pid" }
 
 
-- name: Create /var/run/slurm/
+- name: Create a few dirs /var/run/slurm/
   become: yes
   file:
-    name: /var/run/slurm/
+    name: "{{ item }}"
     state: directory
     owner: slurm
     group: slurm
+  with_items:
+  - /var/run/slurm/
+  - /var/log/slurm/

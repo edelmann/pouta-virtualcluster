@@ -11,7 +11,7 @@
 - name: Touch a bunch of log files
   become: yes
   file:
-    path: "/var/log/{{ item }}"
+    path: "/var/log/slurm/{{ item }}"
     owner: slurm
     group: slurm
     state: touch
@@ -19,6 +19,21 @@
   - slurmctld.log
   - slurm_jobacct.log
   - slurm_jobcomp.log
+
+- name: Copy conf files
+  become: yes
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/slurm/{{ item }}"
+  with_items:
+  - slurmdbd.conf
+
+- name: Enable & start slurmdbd
+  become: yes
+  service: 
+    name: slurmdbd
+    enabled: yes
+    state: restarted
 
 - name: Enable & start slurmctld
   become: yes

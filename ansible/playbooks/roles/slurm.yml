@@ -1,18 +1,14 @@
 ---
-- name: Munge
-  hosts: all
+- name: Prepare stuff on localhost
+  hosts: localhost
+  connection: local
   roles:
-    - munge-common
-    - munge-fe
-
-- name: Download & Compile SLURM
-  hosts: frontend
-  roles:
-    - slurm-compile
+    - munge-prep
 
 - name: Common configuration
   hosts: frontend:node
   roles:
+    - slurm-compile
     - slurm-common
 
 - name: Slurm masternode play

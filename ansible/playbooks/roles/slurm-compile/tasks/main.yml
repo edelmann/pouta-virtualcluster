@@ -4,44 +4,37 @@
   yum:
     state: installed
     name:
-    - openssl
-    - openssl-devel
-    - pam-devel
-    - numactl
-    - numactl-devel
-    - hwloc
-    - hwloc-devel
-    - lua
-    - lua-devel
-    - readline-devel
-    - rrdtool-devel
-    - ncurses-devel
-    - man2html
-    - libibmad
-    - libibumad
     - rpm-build
+    - readline-devel
     - perl-ExtUtils-MakeMaker
-    - gtk+
-    - gtk+-devel
+    - pam-devel
+#    - openssl
+#    - openssl-devel
+#    - numactl
+#    - numactl-devel
+#    - hwloc
+#    - hwloc-devel
+#    - lua
+#    - lua-devel
+#    - rrdtool-devel
+#    - ncurses-devel
+#    - man2html
+#    - libibmad
+#    - libibumad
+#    - gtk+
+#    - gtk+-devel
+#    - hdf5
+#    - hdf5-devel
+#    - lz4
+#    - lz4-devel
+#    - hwloc
+#    - hwloc-devel
 
-- name: Set slurm version
-  set_fact: slurm_version=19.05.3-2
-
-- name: Set root dir for SLURM building
-  set_fact: slurm_build_root=/mnt/shared_data/slurmbuild
-
-- name: Set dir for SLURM building
-  set_fact: slurm_rpmbuild="{{ slurm_build_root }}/rpmbuild"
-
-- name: Set dir for SLURM RPMs
-  set_fact: slurm_rpms="{{ slurm_rpmbuild }}/RPMS/x86_64"
 
 - name: Make sure "{{ slurm_rpmbuild }}" exists
-  become: yes
   file:
     name: "{{ slurm_rpmbuild }}"
     state: directory
-    owner: cloud-user
 
 - name: Download slurm
   get_url: 
@@ -49,6 +42,16 @@
     dest: "{{ slurm_build_root }}/slurm-{{ slurm_version }}.tar.bz2"
 
 - name: Build RPMs
-  shell: "HOME={{ slurm_build_root }} rpmbuild -ta {{ slurm_build_root }}/slurm-{{ slurm_version }}.tar.bz2 > slurm-build.log 2>&1"
+  shell: "HOME={{ slurm_build_root }} rpmbuild -ta {{ slurm_build_root }}/slurm-{{ slurm_version }}.tar.bz2 > {{ slurm_build_root }}/slurm-build.log 2>&1"
   args:
-    creates: "{{ slurm_rpms }}/slurm-{{ slurm_version }}.el7.x86_64.rpm"
+    creates: "{{ slurm_rpmbuild }}/RPMS/x86_64/slurm*.x86_64.rpm"
+
+- name: Make dir for the RPMs
+  file:
+    path: "{{ slurm_rpms }}"
+    state: directory
+
+- name: Copy the RPMs to their destination
+  shell: "cp {{ slurm_rpmbuild }}/RPMS/x86_64/slurm*.x86_64.rpm {{ slurm_rpms }}/"
+  args:
+    creates: "{{ slurm_rpms }}/slurm*.x86_64.rpm"

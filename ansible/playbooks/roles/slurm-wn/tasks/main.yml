@@ -27,4 +27,4 @@
   service: 
     name: slurmd
     enabled: yes
-    state: started
+    state: restarted
