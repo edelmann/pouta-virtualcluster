@@ -1,0 +1,22 @@
+---
+- name: Install
+  become: yes
+  yum:
+    state: installed
+    name:
+    - munge-devel
+    - munge-libs
+
+- name: Make sure the dir {{ mungedir }} exists locally
+  file:
+      name: "{{ mungedir }}"
+      state: directory
+      mode: 0700
+
+- name: Create the key
+  shell: |
+    dd if=/dev/urandom bs=1 count=1024 > {{ mungedir }}/munge.key
+    chmod 0400 {{ mungedir }}/munge.key
+    chown cloud-user {{ mungedir }}/munge.key
+  args:
+    creates: "{{ mungedir }}/munge.key"
