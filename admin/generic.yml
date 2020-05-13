@@ -22,3 +22,15 @@
   - name: Set the timezone
     become: yes
     command: timedatectl set-timezone Europe/Helsinki
+
+  - name: Create a .ssh dir
+    file:
+      path: ~/.ssh
+      state: directory
+      mode: 0700
+
+  - name: Populate the .ssh dir with an empty pub file
+    file:
+      path: ~/.ssh/empty.pub
+      state: touch
+      mode: 0644

@@ -3,24 +3,27 @@
 adminkey: eriknew
 
 # Flavor of the Bastion/admin node
-admin_flavor:  standard.small
+admin_flavor:  standard.tiny
 
 # Image (OS) if the admin node
 admin_image: CentOS-7
 
 # Key used with the cluster
-clusterkey: cluster-key
+clusterkey: eriknew
 
 # Flavor of the cluster frontend
 frontend_flavor: standard.tiny
 frontend_image: CentOS-7
 
 # Flavor of the cluster worker nodes
-wn_flavor: hpc-gen2.24core
+wn_flavor: standard.tiny
 #wn_flavor: standard.small
 wn_image: CentOS-7
 
 # Worker node local disk
-wn_local_disk: 120
+wn_local_disk: 12
 
-network: dojkim
+network: project_2001054
+
+
+openstackrc: ~/.config/project_2001054-openrc.sh

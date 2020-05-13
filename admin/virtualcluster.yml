@@ -24,10 +24,10 @@
 
   - name: Copy the openrc.sh file
     copy: 
-      src=templates/dojkim-openrc.sh
-      dest=~/dojkim-openrc.sh
-      mode=600
-      owner=cloud-user
+      src: "{{ openstackrc }}"
+      dest: ~/openrc.sh
+      mode: 0600
+      owner: cloud-user
     
   - name: Create a .globus dir
     file: dest=~/.globus state=directory
