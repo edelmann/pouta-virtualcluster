@@ -6,30 +6,10 @@
     name:
     - rpm-build
     - readline-devel
-    - perl-ExtUtils-MakeMaker
     - pam-devel
-#    - openssl
-#    - openssl-devel
-#    - numactl
-#    - numactl-devel
-#    - hwloc
-#    - hwloc-devel
-#    - lua
-#    - lua-devel
-#    - rrdtool-devel
-#    - ncurses-devel
-#    - man2html
-#    - libibmad
-#    - libibumad
-#    - gtk+
-#    - gtk+-devel
-#    - hdf5
-#    - hdf5-devel
-#    - lz4
-#    - lz4-devel
-#    - hwloc
-#    - hwloc-devel
-
+    - perl-ExtUtils-MakeMaker
+    - munge-devel
+    - python3
 
 - name: Make sure "{{ slurm_rpmbuild }}" exists
   file:
@@ -47,9 +27,12 @@
     creates: "{{ slurm_rpmbuild }}/RPMS/x86_64/slurm*.x86_64.rpm"
 
 - name: Make dir for the RPMs
+  become: yes
   file:
     path: "{{ slurm_rpms }}"
     state: directory
+    mode: 0755
+    owner: cloud-user
 
 - name: Copy the RPMs to their destination
   shell: "cp {{ slurm_rpmbuild }}/RPMS/x86_64/slurm*.x86_64.rpm {{ slurm_rpms }}/"

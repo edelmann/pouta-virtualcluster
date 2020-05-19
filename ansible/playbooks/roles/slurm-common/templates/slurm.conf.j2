@@ -2,7 +2,7 @@
 # Put this file on all nodes of your cluster.
 # See the slurm.conf man page for more information.
 #
-SlurmctldHost={{ hostvars[inventory_hostname]["fe_name"] }}
+SlurmctldHost={{ hostvars[inventory_hostname]["groups"]["frontend"][0] }}
 #SlurmctldHost=
 #
 #DisableRootJobs=NO
@@ -148,8 +148,8 @@ SlurmSchedLogFile=/var/log/slurm/slurm_sched.log
 #
 # COMPUTE NODES
 {% for host in hostvars %}
-{% if "workernodes" in hostvars[host]["group_names"] %}
-NodeName={{ host }} NodeAddr={{ hostvars[host]["local_ip"] }} CPUs={{ hostvars[host]['ansible_facts']['processor_vcpus'] }} State=UNKNOWN
+{% if "node" in hostvars[host]["group_names"] %}
+NodeName={{ host }} NodeAddr={{ hostvars[host]["ansible_facts"]["default_ipv4"]["address"] }} CPUs={{ hostvars[host]['ansible_facts']['processor_vcpus'] }} State=UNKNOWN
 {% endif %}
 {% endfor %}
 PartitionName=alice Nodes=ALL Default=YES MaxTime=INFINITE State=UP

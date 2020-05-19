@@ -1,0 +1,9 @@
+---
+- name: Install dependencies
+  become: yes
+  yum:
+    state: installed
+    name:
+    - pam
+    - munge
+    - munge-libs

@@ -2,11 +2,11 @@
 - name: Install MariaDB
   yum:
     name:
+    - 'mariadb-server'
     - 'mariadb' 
     - 'mariadb-devel'
     - 'MySQL-python'
     state: installed
-    disablerepo: openstack-train
   become: yes
 
 - name: Start & enable the mariadb service

@@ -1,5 +1,3 @@
 ---
 dependencies:
   - { role: mariadb-common }
-  - { role: munge-common }
-

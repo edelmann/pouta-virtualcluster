@@ -2,5 +2,5 @@ slurm_version: 20.02.1
 slurm_build_root: "/home/cloud-user/slurm/{{ slurm_version }}"
 slurm_rpmbuild: "{{ slurm_build_root }}/rpmbuild"
 slurm_rpms: "{{ slurm_rpmbuild }}/RPMS/x86_64"
-mungedir: munge
+mungedir: /home/cloud-user/munge
 

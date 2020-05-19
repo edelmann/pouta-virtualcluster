@@ -3,12 +3,21 @@
   hosts: localhost
   connection: local
   roles:
-    - munge-prep
+    - slurm-local
+
+- name: Common prerequisites
+  hosts: frontend:node
+  roles:
+    - slurm-pre-common
+
+- name: Frontend preparations
+  hosts: frontend
+  roles:
+    - slurm-compile
 
 - name: Common configuration
   hosts: frontend:node
   roles:
-    - slurm-compile
     - slurm-common
 
 - name: Slurm masternode play

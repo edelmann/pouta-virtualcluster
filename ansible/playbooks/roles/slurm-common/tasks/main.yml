@@ -5,26 +5,32 @@
     state: installed
     name:
     - openssl
-#    - openssl-devel
-    - pam-devel
     - numactl
-#    - numactl-devel
     - hwloc
-#    - hwloc-devel
     - lua
-#    - lua-devel
-#    - readline-devel
-#    - rrdtool-devel
-#    - ncurses-devel
     - man2html
     - libibmad
     - libibumad
-#    - rpm-build
-#    - perl-ExtUtils-MakeMaker
 
 #- name: blah
 #  debug:
 #    var: hostvars
+
+- name: Copy the munge key
+  become: yes
+  copy:
+    src: "{{ mungedir }}/munge.key"
+    dest: /etc/munge/munge.key 
+    mode: 0400
+    owner: munge
+    group: munge
+
+- name: Enable the munge daemon
+  become: yes
+  service:
+    name: munge
+    enabled: yes
+    state: started
 
 - name: Find Slurm RPMs
   shell: "ls {{ slurm_rpms }}/slurm*.x86_64.rpm"
@@ -43,8 +49,8 @@
     createhome: no
 
 #- name: debug
-#  debug:
-#    var: hostvars
+  #debug:
+    #var: hostvars
 
 - name: Copy conf files
   become: yes
