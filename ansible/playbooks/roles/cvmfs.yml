@@ -1,0 +1,6 @@
+---
+- name: Prepare stuff on localhost
+  hosts: cvmfs
+  roles:
+    - cvmfs
+

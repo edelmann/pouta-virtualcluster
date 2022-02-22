@@ -1,0 +1,67 @@
+---
+- name: Set the FQDN
+  become: yes
+  command: hostname {{inventory_hostname}}
+
+- name: install numpy
+  become: yes
+  yum: name=numpy state=present
+
+- name: Copy a few scripts
+  become: yes
+  copy:
+    #src: "alicefiles/{{ item }}"
+    src: "{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    mode: 0755
+  with_items:
+  - sq
+  - typestat.py
+  - typestatsum.py
+
+
+- name: create the ~aliprod/.alien dir tree
+  become: yes
+  file: dest=~aliprod/.alien/etc/aliend/alice state=directory
+
+- name: copy the aliend-startup.conf file
+  become: yes
+  lineinfile: dest=~aliprod/.alien/etc/aliend/startup.conf line="alien_organisations=alice" create=yes
+
+- name: copy the alice-startup.conf file
+  become: yes
+  copy:
+      src: alice_startup.conf
+      dest: ~aliprod/.alien/etc/aliend/alice/startup.conf
+
+- name: set the alien_domain env. var.
+  become: yes
+  lineinfile: line="export alien_domain=hip-fi" dest=~aliprod/.alien/environment state=present create=yes
+
+- name: create the .globus dir
+  become: yes
+  file: dest=~aliprod/.globus state=directory mode=700
+
+- name: copy the certificate
+  become: yes
+  copy: src=~/.globus//{{ item.file }} dest=~aliprod/.globus/{{ item.file }} mode={{ item.mode }}
+  with_items:
+  - { file: userkey.pem, mode: 600 }
+  - { file: usercert.pem, mode: 644 }
+
+- name: make symlink to .globus
+  become: yes
+  file: src=~aliprod/.globus dest=~aliprod/.alien/globus state=link
+
+- name: set path for aliprod
+  become: yes
+  lineinfile:
+    line: "export path=$home/bin:$path:/cvmfs/alice.cern.ch/bin/"
+    dest: ~aliprod/.bashrc
+    state: present
+    create: yes
+
+- name: set tmpdir
+  become: yes
+  lineinfile: line="export tmpdir=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
+

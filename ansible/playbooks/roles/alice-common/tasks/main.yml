@@ -1,0 +1,100 @@
+---
+- name: Add the WLCG repo
+  become: yes
+  yum:
+      name:  http://linuxsoft.cern.ch/wlcg/centos7/x86_64/wlcg-repo-1.0.0-1.el7.noarch.rpm
+      state: present
+
+- name: Install HEPOSlibs
+  become: yes
+  yum:
+    state: latest
+    name: HEP_OSlibs
+
+- name: add local .ssh/*.pub files to auhtorized_keys for cloud-user
+  become: yes
+  lineinfile:
+    dest: ~cloud-user/.ssh/authorized_keys
+    line: "{{ item }}"
+    create: yes
+  with_lines: cat ~/.ssh/*.pub
+
+- name: set the timezone; edit /etc/sysconfig/clock
+  become: yes
+  timezone: name=Europe/Helsinki
+
+- name: check if the swapfile is already enabled
+  become: yes
+  command: grep {{ swapfile }} /proc/swaps
+  register: swap_found
+  ignore_errors: true
+
+- name: create swapfile
+  become: yes
+  command: fallocate -l {{ swapsize }} {{ swapfile }} creates={{ swapfile }}
+  when: swap_found is failed
+
+- name: format swapfile
+  become: yes
+  command: mkswap {{ swapfile }}
+  when: swap_found is failed
+
+- name: set permissions for swapfile
+  become: yes
+  file: path={{ swapfile }} owner=root group=root mode=0600
+
+- name: run swapon
+  become: yes
+  command: swapon {{ swapfile }}
+  when: swap_found is failed
+
+- name: put the swapfile into /etc/fstab
+  become: yes
+  mount: name=swap src={{ swapfile }} fstype=swap opts=sw passno=0 dump=0 state=present
+
+
+- name: create the aliprod user
+  user: name=aliprod home=/mnt/aliprod
+  become: yes
+
+- name: create the ssh dir.
+  become: yes
+  become_user: aliprod
+  file:
+    dest: ~aliprod/.ssh/
+    mode: 0700
+    owner: aliprod
+    state: directory
+
+#  - name: copy public ssh key for aliprod
+#    lineinfile:
+#      dest: ~aliprod/.ssh/authorized_keys
+#      line: "{{ item }}"
+#      create: yes
+#    with_file:
+#      - ~/.ssh/id_rsa.pub
+#      - ~/.ssh/cpouta_key.pub
+#    become: yes
+#    become_user: aliprod
+
+- name: create dir for aliprod in /mnt/shared_data
+  become: yes
+  file: dest=/mnt/shared_data/aliprod state=directory owner=aliprod
+
+- name: check if /mnt/tmp exists (e.g. as a link to somewhere)
+  become: yes
+  command: test -e /mnt/tmp
+  register: mnt_tmp_exists
+  ignore_errors: true
+
+- name: create /mnt/tmp if it doesn't exist
+  file:  path=/mnt/tmp state=directory mode=777
+  become: yes
+  when: mnt_tmp_exists is failed
+
+- name: create a .libnetrc
+  copy: src=libnetrc dest=~aliprod/.libnetrc
+  become: yes
+  become_user: aliprod
+
+

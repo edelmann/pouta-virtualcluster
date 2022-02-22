@@ -1,0 +1,18 @@
+---
+- name: Alicify FE
+  hosts: cluster_master
+  roles:
+    - alice-fe
+
+- name: Common alice stuff
+  hosts: all
+  vars:
+    swapfile: '/swapfile'
+    swapsize: 2g
+  roles:
+    - alice-common
+
+- name: alice node stuff
+  hosts: node
+  roles:
+    - alice-nodes

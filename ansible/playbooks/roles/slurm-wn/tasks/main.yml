@@ -28,3 +28,12 @@
     name: slurmd
     enabled: yes
     state: restarted
+
+- name: Config. yum exclude slurm from updates
+  become: yes
+  ini_file:
+    dest: /etc/yum.conf
+    section: main
+    option: exclude
+    value: "slurm*"
+

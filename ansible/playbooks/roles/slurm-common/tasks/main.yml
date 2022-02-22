@@ -59,6 +59,7 @@
     dest: "/etc/slurm/{{ item }}"
   with_items:
   - slurm.conf
+  - cgroup.conf
 
 - name: Edit systemd/slurm*.service
   become: yes
@@ -67,8 +68,8 @@
     line: "{{ item.line }}"
     regexp: "PIDFile=.*"
   with_items:
-  - { path: /usr/lib/systemd/system/slurmd.service, line: "PIDFile=/var/run/slurm/slurmd.pid" }
-  - { path: /usr/lib/systemd/system/slurmctld.service, line: "PIDFile=/var/run/slurm/slurmctld.pid" }
+  - { path: /usr/lib/systemd/system/slurmd.service, line: "PIDFile=/var/run/slurmd.pid" }
+  - { path: /usr/lib/systemd/system/slurmctld.service, line: "PIDFile=/var/run/slurmctld.pid" }
 
 
 - name: Create a few dirs /var/run/slurm/

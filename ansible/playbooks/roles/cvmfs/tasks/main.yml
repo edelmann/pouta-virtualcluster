@@ -1,0 +1,30 @@
+---
+- name: add the cernvm repo
+  become: yes
+  #copy: src=cernvm.repo dest=/etc/yum.repos.d/cernvm.repo 
+  yum:
+        name: https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest.noarch.rpm
+
+#- name: import the gpg key of the repo
+#  become: yes
+#  get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/rpm-gpg-key-cernvm  dest=/etc/pki/rpm-gpg/rpm-gpg-key-cernvm
+
+- name: install cvmfs
+  become: yes
+  yum:
+    state: latest
+    name:
+    - cvmfs
+    - cvmfs-init-scripts
+
+- name: Configure CVMFS
+  become: yes
+  template: src=cvmfs-default.j2 dest=/etc/cvmfs/default.local 
+
+- name: Run cvmfs_config setup
+  become: yes
+  command: cvmfs_config setup
+
+- name: Start autofs
+  become: yes
+  service: name=autofs state=started enabled=yes

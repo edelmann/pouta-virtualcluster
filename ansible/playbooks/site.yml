@@ -13,7 +13,9 @@
 - import_playbook: roles/cluster.yml
 
 # ALICE stuff (has be done before the gridengine stuff)
-- import_playbook: roles/alicefy.yml
+- import_playbook: roles/alice.yml
+
+- import_playbook: roles/cvmfs.yml
 
 # ganglia for monitoring
 #- import_playbook: roles/ganglia.yml

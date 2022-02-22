@@ -1,0 +1,16 @@
+---
+- name: set up a cron job to clean the filesystem of alien files
+  become: yes
+  copy: src=crondaily dest=/etc/cron.daily/cleanalice mode=755
+
+- name: add a crontab entry to remove core files
+  become: yes
+  cron: hour="*/4" job="find /mnt/tmp/alice/wrk -cmin +360 -type f -name 'core.*' -exec rm {} \;" name="remove core files"
+
+- name: copy the stray process searching script
+  become: yes
+  copy: src=seek_stray.py dest=/usr/local/bin/seek_stray mode=755
+
+#  - name: add a crontab entry to kill stray processes
+#    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="kill stray processes"
+

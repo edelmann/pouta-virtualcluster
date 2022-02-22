@@ -561,7 +561,9 @@ class Cluster(object):
 
         def get_line_for_host(config, vm):
             name = vm.name
-            ip = oaw.get_addresses(vm)[0]
+            tmp = oaw.get_addresses(vm)
+            print("oaw.get_addresses() says '%s'" % str(tmp))
+            ip = tmp[0]
             admin_user = config['admin-user']
             return '%s ansible_ssh_host=%s ansible_ssh_user=%s' % (name, ip, admin_user)
 
@@ -698,6 +700,7 @@ def run_main_playbook():
 
 
 def run_bootstrap(hosts=[]):
+    time.sleep(120)
     cmd = "ansible-playbook ../ansible/playbooks/bootstrap.yml -i ansible-hosts -f %d" % NUM_PARALLEL_ANSIBLE_TASKS
     if os.path.isfile('key.priv'):
         cmd += ' --private-key key.priv'

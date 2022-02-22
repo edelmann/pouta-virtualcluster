@@ -1,0 +1,194 @@
+---
+- name: Some generic FE stuff
+  hosts: cluster_master
+  become: yes
+  tasks:
+
+  - name: Set the FQDN
+    command: hostname {{inventory_hostname}}
+
+  - name: install numpy
+    yum: name=numpy state=present
+
+  - name: Copy a few scripts
+    copy:
+      #src: "alicefiles/{{ item }}"
+      src: "{{ item }}"
+      dest: "/usr/local/bin/{{ item }}"
+      mode: 0755
+    with_items:
+    - sq
+    - typestat.py
+    - typestatsum.py
+
+- name: Some generic stuff
+  hosts: all
+  become: yes
+  tasks:
+
+  - name: Add the WLCG repo
+    yum:
+        name:  http://linuxsoft.cern.ch/wlcg/centos7/x86_64/wlcg-repo-1.0.0-1.el7.noarch.rpm
+        state: present
+
+#    copy:
+#      src: alicefiles/wlcg.repo
+#      dest: /etc/yum.repos.d/wlcg.repo
+
+  - name: Install HEPOSlibs
+    yum:
+      state: latest
+      name: HEP_OSlibs
+
+  - name: add local .ssh/*.pub files to auhtorized_keys for cloud-user
+    lineinfile:
+      dest: ~cloud-user/.ssh/authorized_keys
+      line: "{{ item }}"
+      create: yes
+    with_lines: cat ~/.ssh/*.pub
+
+  - name: set the timezone; edit /etc/sysconfig/clock
+    #timezone: name=europe/helsinki
+    timezone: name=Europe/Helsinki
+
+
+- name: create a swap file
+  become: yes
+  hosts: all
+  vars:
+    swapfile: '/swapfile'
+    swapsize: 2g
+  tasks:
+
+  - name: check if the swapfile is already enabled
+    command: grep {{ swapfile }} /proc/swaps
+    register: swap_found
+    ignore_errors: true
+
+  - name: create swapfile
+    command: fallocate -l {{ swapsize }} {{ swapfile }} creates={{ swapfile }}
+    when: swap_found is failed
+
+  - name: format swapfile
+    command: mkswap {{ swapfile }}
+    when: swap_found is failed
+
+  - name: set permissions for swapfile
+    file: path={{ swapfile }} owner=root group=root mode=0600
+
+  - name: run swapon
+    command: swapon {{ swapfile }}
+    when: swap_found is failed
+
+  - name: put the swapfile into /etc/fstab
+    mount: name=swap src={{ swapfile }} fstype=swap opts=sw passno=0 dump=0 state=present
+
+
+- name: create the aliprod user on fe and nodes
+  hosts: all
+  tasks:
+
+  - name: create the aliprod user
+    user: name=aliprod home=/mnt/aliprod
+    become: yes
+
+  - name: create the ssh dir.
+    become: yes
+    become_user: aliprod
+    file:
+      dest: ~aliprod/.ssh/
+      mode: 0700
+      owner: aliprod
+      state: directory
+
+#  - name: copy public ssh key for aliprod
+#    lineinfile:
+#      dest: ~aliprod/.ssh/authorized_keys
+#      line: "{{ item }}"
+#      create: yes
+#    with_file:
+#      - ~/.ssh/id_rsa.pub
+#      - ~/.ssh/cpouta_key.pub
+#    become: yes
+#    become_user: aliprod
+
+  - name: create dir for aliprod in /mnt/shared_data
+    file: dest=/mnt/shared_data/aliprod state=directory owner=aliprod
+    become: yes
+
+  - name: check if /mnt/tmp exists (e.g. as a link to somewhere)
+    command: test -e /mnt/tmp
+    register: mnt_tmp_exists
+    ignore_errors: true
+
+  - name: create /mnt/tmp if it doesn't exist
+    file:  path=/mnt/tmp state=directory mode=777
+    become: yes
+    when: mnt_tmp_exists is failed
+
+  - name: create a .libnetrc
+    copy: src=libnetrc dest=~aliprod/.libnetrc
+    become: yes
+    become_user: aliprod
+
+    
+
+- name: configure the alien services
+  hosts: cluster_master
+  become: yes
+  become_user: aliprod
+  tasks:
+
+  - name: create the ~aliprod/.alien dir tree
+    file: dest=~aliprod/.alien/etc/aliend/alice state=directory
+
+  - name: copy the aliend-startup.conf file
+    lineinfile: dest=~aliprod/.alien/etc/aliend/startup.conf line="alien_organisations=alice" create=yes
+
+  - name: copy the alice-startup.conf file
+    copy:
+        dest: ~aliprod/.alien/etc/aliend/alice/startup.conf
+        src: alice_startup.conf
+
+  - name: set the alien_domain env. var.
+    lineinfile: line="export alien_domain=hip-fi" dest=~aliprod/.alien/environment state=present create=yes
+
+  - name: create the .globus dir
+    file: dest=~aliprod/.globus state=directory mode=700
+
+  - name: copy the certificate
+    copy: src=~/.globus//{{ item.file }} dest=~aliprod/.globus/{{ item.file }} mode={{ item.mode }}
+    with_items:
+    - { file: userkey.pem, mode: 600 }
+    - { file: usercert.pem, mode: 644 }
+
+  - name: make symlink to .globus
+    file: src=~aliprod/.globus dest=~aliprod/.alien/globus state=link
+
+  - name: set path for aliprod
+    lineinfile:
+      line: "export path=$home/bin:$path:/cvmfs/alice.cern.ch/bin/"
+      dest: ~aliprod/.bashrc
+      state: present
+      create: yes
+
+  - name: set tmpdir
+    lineinfile: line="export tmpdir=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
+
+
+- name: some generic node stuff
+  hosts: node
+  become: yes
+  tasks:
+
+  - name: set up a cron job to clean the filesystem of alien files
+    copy: src=crondaily dest=/etc/cron.daily/cleanalice mode=755
+
+  - name: add a crontab entry to remove core files
+    cron: hour="*/4" job="find /mnt/tmp/alice/wrk -cmin +360 -type f -name 'core.*' -exec rm {} \;" name="remove core files"
+
+  - name: copy the stray process searching script
+    copy: src=seek_stray.py dest=/usr/local/bin/seek_stray mode=755
+
+#  - name: add a crontab entry to kill stray processes
+#    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="kill stray processes"
