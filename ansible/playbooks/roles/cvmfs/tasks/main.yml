@@ -9,6 +9,13 @@
 #  become: yes
 #  get_url: url=http://cvmrepo.web.cern.ch/cvmrepo/yum/rpm-gpg-key-cernvm  dest=/etc/pki/rpm-gpg/rpm-gpg-key-cernvm
 
+- name: Fix the CernVM repo file
+  become: yes
+  replace:
+    path: /etc/yum.repos.d/cernvm.repo
+    regexp: "http://"
+    replace: "https://"
+
 - name: install cvmfs
   become: yes
   yum:
