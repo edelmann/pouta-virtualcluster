@@ -20,3 +20,31 @@
 #  - name: add a crontab entry to kill stray processes
 #    cron: user=aliprod minute="*/15" job="kill `/usr/local/bin/seek_stray ` > /dev/null 2>&1" name="kill stray processes"
 
+- name: Enable user namespaces
+  become: yes
+  lineinfile:
+    state: present
+    create: yes
+    path: /etc/sysctl.d/90-max_user_namespaces.conf
+    line: "user.max_user_namespaces = 15000"
+    regexp: "^user.max_user_namespaces"
+
+- name: run sysctl on it
+  become: yes
+  shell:
+    cmd: "sysctl -p /etc/sysctl.d/90-max_user_namespaces.conf"
+
+- name: Disable network namespaces
+  become: yes
+  lineinfile:
+    state: present
+    create: yes
+    path: /etc/sysctl.d/90-max_net_namespaces.conf
+    line: "user.max_net_namespaces = 0"
+    regexp: "^user.max_net_namespaces"
+
+- name: run sysctl on it
+  become: yes
+  shell:
+    cmd: "sysctl -p /etc/sysctl.d/90-max_net_namespaces.conf"
+
