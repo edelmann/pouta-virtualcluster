@@ -65,3 +65,7 @@
   become: yes
   lineinfile: line="export tmpdir=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
 
+- name: add a crontab entry clean /mnt/shared_data/aliprod/
+  become: yes
+  cron: hour="03" job="find /mnt/shared_data/aliprod/ -ctime +2 -type d -name 'jobagent_alice-tron.hip.fi*' -exec rm -r {} \;" name="remove job dirs"
+
