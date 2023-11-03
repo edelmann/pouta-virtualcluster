@@ -1,3 +1,3 @@
 #!/bin/bash
 
-squeue | awk '$5 == "R"{n[$8]+=$7;N++}END{for (m in n) print m, n[m]; print "total:       " N}' | sort
+squeue | awk '$5 == "R"{n[$8]+=$7;njobs++}END{for (m in n) { print m, n[m]; nnodes++} print "b---------------"; print "Total jobs:  " njobs; print "Total nodes: " nnodes}' | sort
