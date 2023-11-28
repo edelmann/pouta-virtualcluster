@@ -19,6 +19,9 @@
   - typestat.py
   - typestatsum.py
 
+- name: Define the alias squ
+  become: yes
+  lineinfile: line="alias squ='squeue -o \"%.18i %.9P %.8j %.8u %.2t %.10M %.6C %R\"'"  dest=~aliprod/.bashrc  state=present
 
 - name: create the ~aliprod/.alien dir tree
   become: yes
