@@ -22,33 +22,34 @@
         - python-yaml
         - ansible
 
-  - name: Copy the openrc.sh file
-    copy: 
-      src=templates/dojkim-openrc.sh
-      dest=~/dojkim-openrc.sh
-      mode=600
-      owner=cloud-user
+#  - name: Copy the openrc.sh file
+#    copy: 
+#      src=templates/dojkim-openrc.sh
+#      dest=~/dojkim-openrc.sh
+#      mode=600
+#      owner=cloud-user
     
   - name: Create a .globus dir
     file: dest=~/.globus state=directory
 
-  - name: copy the certificate
-    copy:
-      src=templates/{{ item }}
-      dest=~/.globus/{{ item }}
-      mode=600
-      owner=cloud-user
-    with_items:
-      - usercert.pem
-      - userkey.pem
+#  - name: copy the certificate
+#    copy:
+#      src=templates/{{ item }}
+#      dest=~/.globus/{{ item }}
+#      mode=600
+#      owner=cloud-user
+#    with_items:
+#      - usercert.pem
+#      - userkey.pem
 
-  - name: Copy .gitconfig
-    copy: src=~/.gitconfig dest=~/.gitconfig
+#  - name: Copy .gitconfig
+#    copy: src=~/.gitconfig dest=~/.gitconfig
 
   - name: Clone the pouta-virtualcluster git repo
-    git:
-      repo=https://github.com/edelmann/pouta-virtualcluster.git
-      dest=~cloud-user/pouta-virtualcluster
+    ansible.builtin.git:
+      repo: https://github.com/edelmann/pouta-virtualcluster.git
+      dest: ~cloud-user/pouta-virtualcluster
+      update: no
 
   - name: Create a ~/bin
     file: dest=~/bin state=directory
