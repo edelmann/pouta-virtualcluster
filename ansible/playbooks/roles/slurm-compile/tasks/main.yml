@@ -23,9 +23,10 @@
     - perl-ExtUtils-MakeMaker
     - gtk+
     - gtk+-devel
+    - python3
 
-- name: Set slurm version
-  set_fact: slurm_version=19.05.3-2
+#- name: Set slurm version
+#  set_fact: slurm_version=19.05.3-2
 
 - name: Set root dir for SLURM building
   set_fact: slurm_build_root=/mnt/shared_data/slurmbuild

@@ -26,8 +26,8 @@
 #  debug:
 #    var: hostvars
 
-- name: Set slurm version
-  set_fact: slurm_version=19.05.3-2
+#- name: Set slurm version
+#  set_fact: slurm_version=23.11.1
 
 - name: Set root dir for SLURM building
   set_fact: slurm_build_root=/mnt/shared_data/slurmbuild
@@ -73,6 +73,7 @@
   with_items:
   - { path: /usr/lib/systemd/system/slurmd.service, line: "PIDFile=/var/run/slurm/slurmd.pid" }
   - { path: /usr/lib/systemd/system/slurmctld.service, line: "PIDFile=/var/run/slurm/slurmctld.pid" }
+  - { path: /usr/lib/systemd/system/slurmdbd.service, line: "PIDFile=/var/run/slurm/slurmdbd.pid" }
 
 
 - name: Create /var/run/slurm/

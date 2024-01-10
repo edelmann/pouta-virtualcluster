@@ -31,15 +31,15 @@ TaskPlugin=task/none
 #
 #
 # SCHEDULING
-FastSchedule=1
+#FastSchedule=1
 SchedulerType=sched/backfill
 #SelectType=select/linear
-SelectType=select/cons_res
+SelectType=select/cons_tres
 SelectTypeParameters=CR_CORE
 #
 #
 # LOGGING AND ACCOUNTING
-AccountingStorageType=accounting_storage/filetxt
+#AccountingStorageType=accounting_storage/slurmdbd
 ClusterName=cluster
 #JobAcctGatherFrequency=30
 JobAcctGatherType=jobacct_gather/linux
