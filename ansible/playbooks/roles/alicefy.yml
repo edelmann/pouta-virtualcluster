@@ -19,6 +19,7 @@
       mode: 0755
     with_items:
     - sq
+    - squ
     - typestat.py
     - typestatsum.py
 
