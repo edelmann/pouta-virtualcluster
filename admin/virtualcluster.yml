@@ -73,6 +73,17 @@
       src: cluster.yml.j2
       dest: ~/alice-cluster/cluster.yml
 
+  - name: Create a group_vars dir
+    file:
+      dest: ~/alice-cluster/group_vars
+      state: directory
+
+  - name: Copy a sample group_vars/all.yml file
+    tamplate:
+      src: all.yml.j2
+      dest:  ~/alice-cluster/group_vars/all.yml
+      mode: 0600
+
   - name: Copy my_ip script
     copy:
       src: templates/my_ip
