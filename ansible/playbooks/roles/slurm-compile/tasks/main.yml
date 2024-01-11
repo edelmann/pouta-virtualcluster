@@ -24,6 +24,20 @@
     - gtk+
     - gtk+-devel
     - python3
+    - json-parser
+    - json-parser-devel
+    - http-parser
+    - http-parser-devel
+    - libjwt
+    - libjwt-devel
+    - libyaml
+    - libyaml-devel
+    - hdf5
+    - hdf5-devel
+    - lz4
+    - lz4-devel
+    - nvml-tools
+    - MySQL-python
 
 #- name: Set slurm version
 #  set_fact: slurm_version=19.05.3-2
@@ -52,4 +66,4 @@
 - name: Build RPMs
   shell: "HOME={{ slurm_build_root }} rpmbuild -ta {{ slurm_build_root }}/slurm-{{ slurm_version }}.tar.bz2 > slurm-build.log 2>&1"
   args:
-    creates: "{{ slurm_rpms }}/slurm-{{ slurm_version }}.el7.x86_64.rpm"
+    creates: "{{ slurm_rpms }}/slurm-{{ slurm_version }}-1.el7.x86_64.rpm"
