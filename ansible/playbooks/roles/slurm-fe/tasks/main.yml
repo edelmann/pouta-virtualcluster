@@ -17,8 +17,30 @@
     state: touch
   with_items:
   - slurmctld.log
+  - slurmdbd.log
   - slurm_jobacct.log
   - slurm_jobcomp.log
+
+- name: Create a slurm MariaDB user
+  become: yes
+  community.mysql.mysql_user:  # Might require `ansible-galaxy collection install community.mysql`
+    name: slurm
+    password: '{{ slurm_dbpwd }}'
+    priv: '*.*:ALL'
+
+- name: Copy a slurmdbd.conf file
+  become: yes
+  template:
+    src: slurmdbd.conf.j2
+    dest: /etc/slurm/slurmdbd.conf
+    mode: 0600
+
+- name: Enable & start slurmdbd
+  become: yes
+  service: 
+    name: slurmdbd
+    enabled: yes
+    state: restarted
 
 - name: Enable & start slurmctld
   become: yes
