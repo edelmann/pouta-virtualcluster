@@ -122,9 +122,11 @@ Log in to the admin node, source the openrc.sh and start deploying the cluster:
 
     cd ~/alice-cluster
 
-* Check the cluster.yml file, and edit it if needed
+* Check the cluster.yml and groupvars/all.yml files, and edit it if needed
 
-    vi cluster.yml
+    vim cluster.yml
+    vim groupvars_all.yml
+
 
 * bring the cluster up with a frontend and two nodes::
 

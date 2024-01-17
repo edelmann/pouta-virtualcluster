@@ -26,9 +26,6 @@
 #  debug:
 #    var: hostvars
 
-#- name: Set slurm version
-#  set_fact: slurm_version=23.11.1
-
 - name: Set root dir for SLURM building
   set_fact: slurm_build_root=/mnt/shared_data/slurmbuild
 
@@ -58,7 +55,7 @@
   #debug:
     #var: hostvars['alice-node01']['ansible_facts']
 
-- name: Copy slurm.conf
+- name: Copy slurm.conf 
   become: yes
   template:
     src: slurm.conf.j2

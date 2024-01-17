@@ -56,7 +56,7 @@
   file:
     name: "{{ slurm_rpmbuild }}"
     state: directory
-    owner: cloud-user
+    owner: "{{ remoteuser }}"
 
 - name: Download slurm
   get_url: 

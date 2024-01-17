@@ -35,9 +35,9 @@
   become: yes
   tasks:
 
-  - name: Add local .ssh/*.pub files to auhtorized_keys for cloud-user
+  - name: Add local .ssh/*.pub files to auhtorized_keys for the remoteuser
     lineinfile:
-      dest: ~cloud-user/.ssh/authorized_keys
+      dest: ~{{ remoteuser }}/.ssh/authorized_keys
       line: "{{ item }}"
       create: yes
     with_lines: cat ~/.ssh/*.pub

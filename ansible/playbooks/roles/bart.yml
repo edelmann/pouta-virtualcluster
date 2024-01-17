@@ -1,0 +1,6 @@
+--- 
+- name: Download & Compile SLURM
+  hosts: frontend
+  roles:
+    - bart
+

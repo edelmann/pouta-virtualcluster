@@ -1,4 +1,19 @@
 ---
+- name: Install cgroup
+  become: yes
+  yum:
+    state: installed
+    name:
+    - libcgroup
+    - libcgroup-tools
+
+- name: Enable & (re)start cgroup
+  become: yes
+  service:
+    name: cgconfig
+    enabled: yes
+    state: restarted
+
 - name: Copy cgroup.conf
   become: yes
   copy:
@@ -27,4 +42,4 @@
   service: 
     name: slurmd
     enabled: yes
-    state: started
+    state: restarted

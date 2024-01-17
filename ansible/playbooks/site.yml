@@ -21,6 +21,9 @@
 # SLURM for batch prosessing
 - import_playbook: roles/slurm.yml
 
+# BaRT, for SGAS reporting
+- import_playbook: roles/bart.yml
+
 # Hadoop/HDFS for map reduce and distributed filesystem
 #- import_playbook: roles/hadoop.yml
 

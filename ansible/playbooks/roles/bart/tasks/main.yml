@@ -1,0 +1,58 @@
+---
+- name: Install prerequisities
+  become: yes
+  yum:
+    state: present
+    name:
+    #- python3-twisted
+    #- python-twisted-core
+    #- python-twisted-web
+    - pyOpenSSL
+    - python-dateutil
+    #- python-elementtree
+
+- name: Download & unpack bart
+  unarchive:
+    src: http://www.sgas.se/releases/sgas-bart-{{ bart_version }}.tar.gz
+    remote_src: True
+    dest: ~/
+    creates: ~/sgas-bart-{{ bart_version }}
+  when: bart_version != "git"
+
+- name: Clone the BART git repo
+  git:
+    #repo: git@github.com:sgas/bart.git
+    repo: https://github.com/sgas/bart.git
+    dest: sgas-bart-git
+    accept_hostkey: yes
+  when: bart_version == "git"
+  ignore_errors: True
+
+- name: Install bart
+  become: yes
+  command: python setup.py install
+  args:
+    chdir: ~{{ remoteuser }}/sgas-bart-{{ bart_version }}
+
+- name: Copy bart.conf
+  become: yes
+  template:
+    src: bart.conf.j2
+    dest: /etc/bart/bart.conf
+
+- name: Create log files with correct ownership
+  become: yes
+  ansible.builtin.file:
+    path: "/var/log/{{ item }}"
+    owner: "{{ remoteuser }}"
+    state: touch
+  with_items:
+    - bart-logger.log
+    - bart-registration.log
+ 
+- name: Create a spool dir with correct ownership
+  become: yes
+  ansible.builtin.file:
+    path: "/var/spool/bart"
+    owner: "{{ remoteuser }}"
+    state: directory

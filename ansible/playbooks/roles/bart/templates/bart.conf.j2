@@ -1,0 +1,43 @@
+## Configuration file for the LRMS UR Generator Intended location:
+## /etc/bart/bart.conf
+##
+## Most of the values belows are the default values, and can be changed if
+## necessary. If the hostname is not defined, the result from hostname -f is
+## used.
+
+## EXAMPLE ## REMOVE THIS LINE TO ACTIVATE /etc/cron.hourly/sgas-bart ##
+
+## Bart configuration
+[common]
+#logdir=/var/spool/bart/usagerecords
+#hostname=host.example.org
+#usermap=/etc/bart/usermap
+#vomap=/etc/bart/vomap
+defaultvo=alicetest
+#logfile=/var/log/bart.log
+#statedir=/var/spool/bart
+
+## Logging points
+[logger]
+log_all="https://{{ sgas_server }}:6143/sgas"
+
+
+## Example maui configuration
+## Uncomment in the section and set spooldir if you want to use Maui
+#[maui]
+#spooldir=/var/spool/maui
+
+
+## Example torque configuration
+## Uncomment the section and set spooldir if you want to use Torque
+#[torque]
+#spooldir=/var/spool/torque
+
+
+## example slurm configuration
+## uncomment the section if you want to use SLURM
+[slurm]
+# If you use bart together with ARC, please read docs/arc-codeployment first!
+# This should probably be true as default.
+#idtimestamp=true
+
