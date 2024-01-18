@@ -13,9 +13,13 @@
 #hostname=host.example.org
 #usermap=/etc/bart/usermap
 #vomap=/etc/bart/vomap
-defaultvo=alicetest
+defaultvo=alice
+suppress_usermap_info=true
 #logfile=/var/log/bart.log
 #statedir=/var/spool/bart
+x509_user_key=/mnt/aliprod/.globus/hostkey.pem
+x509_user_cert=/mnt/aliprod/.globus/hostcert.pem
+
 
 ## Logging points
 [logger]
@@ -39,5 +43,6 @@ log_all="https://{{ sgas_server }}:6143/sgas"
 [slurm]
 # If you use bart together with ARC, please read docs/arc-codeployment first!
 # This should probably be true as default.
-#idtimestamp=true
-
+idtimestamp=true
+users=aliprod
+statefile_default=3600
