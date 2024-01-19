@@ -4,12 +4,8 @@
   yum:
     state: present
     name:
-    #- python3-twisted
-    #- python-twisted-core
-    #- python-twisted-web
     - pyOpenSSL
     - python-dateutil
-    #- python-elementtree
 
 - name: Download & unpack bart
   unarchive:
@@ -33,6 +29,8 @@
   command: python setup.py install
   args:
     chdir: ~{{ remoteuser }}/sgas-bart-{{ bart_version }}
+    creates: /usr/local/bin/bart-logger
+
 
 - name: Copy bart.conf
   become: yes
@@ -40,19 +38,28 @@
     src: bart.conf.j2
     dest: /etc/bart/bart.conf
 
-- name: Create log files with correct ownership
-  become: yes
-  ansible.builtin.file:
-    path: "/var/log/{{ item }}"
-    owner: "{{ remoteuser }}"
-    state: touch
-  with_items:
-    - bart-logger.log
-    - bart-registration.log
+#- name: Create log files with correct ownership
+#  become: yes
+#  ansible.builtin.file:
+#    path: "/var/log/{{ item }}"
+#    owner: "{{ remoteuser }}"
+#    state: touch
+#  with_items:
+#    - bart-logger.log
+#    - bart-registration.log
  
-- name: Create a spool dir with correct ownership
+- name: Create a spool dir
   become: yes
   ansible.builtin.file:
     path: "/var/spool/bart"
-    owner: "{{ remoteuser }}"
+    #owner: "{{ remoteuser }}"
     state: directory
+
+- name: Set up a cron job
+  become: yes
+  ansible.builtin.cron:
+    cron_file: bart
+    job: "bart-logger && python3 /usr/local/bin/bart-registrant"
+    minute: "15"
+    name: "Report usage to SGAS"
+    user: root
