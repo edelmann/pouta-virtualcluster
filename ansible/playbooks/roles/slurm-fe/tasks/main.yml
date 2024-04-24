@@ -24,9 +24,13 @@
 - name: Create a slurm MariaDB user
   become: yes
   community.mysql.mysql_user:  # Might require `ansible-galaxy collection install community.mysql`
+    login_user: root
+    login_password: "{{ mariadb_pw }}"
+    login_unix_socket: /var/lib/mysql/mysql.sock
     name: slurm
-    password: '{{ slurm_dbpwd }}'
+    password: '{{ slurm_dbpw }}'
     priv: '*.*:ALL'
+    state: present
 
 - name: Copy a slurmdbd.conf file
   become: yes

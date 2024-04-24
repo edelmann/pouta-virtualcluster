@@ -1,3 +1,4 @@
 #!/bin/bash
 
-ifconfig eth0 | awk '/inet /{print $2}'
+#ifconfig eth0 | awk '/inet /{print $2}'
+openstack server list | awk '$4 == "admin" {ip=$8; gsub("^[^=]*=", "", ip); gsub(",","",ip); print ip}'

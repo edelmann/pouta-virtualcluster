@@ -45,6 +45,7 @@
     name: "{{ ls_rpms.stdout_lines }}"
     state: present
     disable_excludes: main
+    disable_gpg_check: true
 
 - name: Make sure slurm is excluded in yum
   become: yes

@@ -10,10 +10,10 @@
   shell: exportfs -r
 
 - name: ensure nfs service is running
-  service: name=nfs state=started
+  service: name=nfs-server state=started
 
 - name: restart nfsd
-  service: name=nfs state=restarted
+  service: name=nfs-server state=restarted
 
 - name: kill-HUP sshd
   shell: pkill -HUP sbin/sshd

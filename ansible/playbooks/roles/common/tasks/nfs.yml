@@ -16,6 +16,7 @@
   tags:
     - nfs
   with_items:
-    - rpcbind
-    - nfslock
-    - nfs
+    - nfs-server
+    #- rpcbind
+    #- nfslock
+    #- nfs

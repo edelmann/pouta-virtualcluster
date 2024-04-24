@@ -15,8 +15,12 @@
 - name: configure and start acpid service
   service: name=acpid state=started enabled=true
 
+- name: Install chrony
+  yum:
+    name: chrony
+
 - name: Set up NTP
-  service: name=ntpd enabled=yes state=started
+  service: name=chronyd enabled=yes state=started
 
 - name: install misc auxiliary packages (CentOS)
   yum:
@@ -31,3 +35,5 @@
     - screen
     - tmpwatch
     - vim-X11
+    - vim-enhanced
+    - openldap-clients

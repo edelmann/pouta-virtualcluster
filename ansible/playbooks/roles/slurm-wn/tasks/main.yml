@@ -1,24 +1,24 @@
 ---
-- name: Install cgroup
-  become: yes
-  yum:
-    state: installed
-    name:
-    - libcgroup
-    - libcgroup-tools
+#- name: Install cgroup
+#  become: yes
+#  yum:
+#    state: installed
+#    name:
+#    - libcgroup
+#    - libcgroup-tools
 
 - name: Copy cgroup.conf
   become: yes
   copy:
     src: cgroup.conf
     dest: /etc/slurm/cgroup.conf
-     
-- name: Enable & (re)start cgroup
-  become: yes
-  service:
-    name: cgconfig
-    enabled: yes
-    state: restarted
+#     
+#- name: Enable & (re)start cgroup
+#  become: yes
+#  service:
+#    name: cgconfig
+#    enabled: yes
+#    state: restarted
 
 - name: Create /var/spool/slurmd
   become: yes

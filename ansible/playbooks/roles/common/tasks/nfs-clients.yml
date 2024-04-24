@@ -35,6 +35,8 @@
   tags:
     - nfs
 
+
+# If this fails, restarting the nfs-server on the front end often helps
 - name: configure /etc/fstab on clients
   mount:
     name: "{{nfsmount}}"

@@ -30,8 +30,8 @@
 
 - name: Some generic stuff
   hosts: all
-  vars:
-    hep_oslibs: HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
+#  vars:
+#    hep_oslibs: HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
   become: yes
   tasks:
 
@@ -42,9 +42,13 @@
       create: yes
     with_lines: cat ~/.ssh/*.pub
 
+  - name: Enable CRB
+    ansible.builtin.command: dnf config-manager --set-enabled crb
+
   - name: Install the wlcg-repo
-    yum:
-      name: https://linuxsoft.cern.ch/wlcg/el9/x86_64/wlcg-repo-1.0.0-1.el9.noarch.rpm
+    ansible.builtin.command: yum -y install https://linuxsoft.cern.ch/wlcg/el9/x86_64/wlcg-repo-1.0.0-1.el9.noarch.rpm
+    #    yum:
+    #  name: https://linuxsoft.cern.ch/wlcg/el9/x86_64/wlcg-repo-1.0.0-1.el9.noarch.rpm
 
   - name: Install the HEP_OSlibs
     yum:
@@ -59,7 +63,7 @@
   hosts: cluster_slave
   vars:
     swapfile: '/swapfile'
-    swapsize: 40G
+    #swapsize: 46G
   tasks:
 
   - name: Check if the swapfile is already enabled
@@ -68,7 +72,7 @@
     ignore_errors: True
 
   - name: Create swapfile
-    command: fallocate -l {{ swapsize }} {{ swapfile }} creates={{ swapfile }}
+    command: fallocate -l {{ wn_swapsize }} {{ swapfile }} creates={{ swapfile }}
     when: swap_found is failed
 
   - name: Format swapfile
@@ -153,6 +157,12 @@
   - name: Set the ALIEN_DOMAIN env. var.
     lineinfile: line="export ALIEN_DOMAIN=hip-fi" dest=~aliprod/.alien/Environment state=present create=yes
 
+  - name: Set RUN_ARGS
+    lineinfile:
+      dest: ~aliprod/.alien/config/CE.env
+      create: yes
+      line: 'export RUN_ARGS="-D /mnt/tmp"'
+
   - name: Create the .globus dir
     file: dest=~aliprod/.globus state=directory mode=700
 
@@ -174,6 +184,16 @@
 
   - name: Set TMPDIR
     lineinfile: line="export TMPDIR=/mnt/tmp/"  dest=~aliprod/.bashrc  state=present
+
+  - name: Setup a JA-custom file
+    lineinfile:
+      dest: ~aliprod/JA-custom-0.sh
+      create: yes
+      state: present
+      line: "{{ item }}"
+    with_items:
+      - "ulimit -u 100000"
+      - "unset WORKDIR"
 
 
 - name: Some generic node stuff

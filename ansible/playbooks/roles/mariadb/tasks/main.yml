@@ -11,3 +11,13 @@
     name: mariadb
     enabled: yes
     state: started
+
+#- name: Set MySQL root Password
+#  become: True
+#  mysql_user: 
+#    name: root
+#    password: "{{ mariadb_pw }}"
+#    check_implicit_admin: yes
+#    login_unix_socket: /var/lib/mysql/mysql.sock
+#    login_user: root
+#    state: present
