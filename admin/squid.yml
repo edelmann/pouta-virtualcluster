@@ -8,7 +8,6 @@
     yum:
       name:
         - squid
-        - squid-sysvinit
 
   - name: Kill SELinux
     selinux: state=disabled

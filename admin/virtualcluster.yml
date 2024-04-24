@@ -3,9 +3,11 @@
   hosts: all
   tasks:
   
-  - name: Install the RDO repo (for openstack tools)
+
+  - name: Install EPEL
     become: yes
-    yum: name=https://rdoproject.org/repos/rdo-release.rpm
+    ansible.builtin.yum:
+      name: epel-release
 
   - name: Install some stuff
     become: yes
@@ -13,34 +15,40 @@
       state: latest
       name:
         - openssh-clients
+        - ansible
+        - python3-pip
+
+  - name: Install the Openstack client and other python packages
+    ansible.builtin.pip:
+      name: 
         - python-openstackclient
         - python-keystoneclient
         - python-novaclient
         - python-cinderclient
         - python-neutronclient
         - python-glanceclient
-        - python-yaml
-        - ansible
+        #- python-yaml
+        - yaml-1.3
 
-#  - name: Copy the openrc.sh file
-#    copy: 
-#      src=templates/dojkim-openrc.sh
-#      dest=~/dojkim-openrc.sh
-#      mode=600
-#      owner=cloud-user
+  - name: Copy the openrc.sh file
+    copy: 
+      src: "{{ openstackrc }}"
+      dest: ~/openrc.sh
+      mode: 0600
+      owner: "{{ remoteuser }}"
     
   - name: Create a .globus dir
     file: dest=~/.globus state=directory
 
-#  - name: copy the certificate
-#    copy:
-#      src=templates/{{ item }}
-#      dest=~/.globus/{{ item }}
-#      mode=600
-#      owner=cloud-user
-#    with_items:
-#      - usercert.pem
-#      - userkey.pem
+  - name: copy the certificate
+    copy:
+      src=templates/{{ item }}
+      dest=~/.globus/{{ item }}
+      mode=600
+      owner={{ remoteuser }}
+    with_items:
+      - usercert.pem
+      - userkey.pem
 
 #  - name: Copy .gitconfig
 #    copy: src=~/.gitconfig dest=~/.gitconfig
@@ -48,7 +56,7 @@
   - name: Clone the pouta-virtualcluster git repo
     ansible.builtin.git:
       repo: https://github.com/edelmann/pouta-virtualcluster.git
-      dest: ~cloud-user/pouta-virtualcluster
+      dest: "~{{ remoteuser }}-user/pouta-virtualcluster"
       update: no
 
   - name: Create a ~/bin

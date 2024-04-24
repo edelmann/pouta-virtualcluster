@@ -1,0 +1,6 @@
+slurm_version: 20.02.1
+slurm_build_root: "/home/{{ remoteuser }}/slurm/{{ slurm_version }}"
+slurm_rpmbuild: "{{ slurm_build_root }}/rpmbuild"
+slurm_rpms: "{{ slurm_rpmbuild }}/RPMS/x86_64"
+mungedir: /home/{{ remoteuser }}/munge
+
