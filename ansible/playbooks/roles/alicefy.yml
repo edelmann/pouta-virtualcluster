@@ -1,8 +1,8 @@
 ---
 - name: Some generic FE stuff
   hosts: cluster_master
-  vars:
-    hep_oslibs: HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
+#  vars:
+#    hep_oslibs: HEP_OSlibs-7.2.9-1.el7.cern.x86_64.rpm
   become: yes
   tasks:
 
@@ -23,10 +23,10 @@
     - typestat.py
     - typestatsum.py
 
-  - name: Get the HEP OSlibs RPM
-    get_url:
-        url: "https://linuxsoft.cern.ch/wlcg/centos7/x86_64/{{ hep_oslibs }}"
-        dest: "/mnt/shared_data/{{ hep_oslibs }}"
+#  - name: Get the HEP OSlibs RPM
+#    get_url:
+#        url: "https://linuxsoft.cern.ch/wlcg/centos7/x86_64/{{ hep_oslibs }}"
+#        dest: "/mnt/shared_data/{{ hep_oslibs }}"
 
 - name: Some generic stuff
   hosts: all
@@ -42,9 +42,13 @@
       create: yes
     with_lines: cat ~/.ssh/*.pub
 
+  - name: Install the wlcg-repo
+    yum:
+      name: https://linuxsoft.cern.ch/wlcg/el9/x86_64/wlcg-repo-1.0.0-1.el9.noarch.rpm
+
   - name: Install the HEP_OSlibs
     yum:
-        name: "/mnt/shared_data/{{ hep_oslibs }}"
+        name: HEP_OSlibs
 
   - name: Set the timezone; Edit /etc/sysconfig/clock
     timezone: name=Europe/Helsinki
@@ -55,7 +59,7 @@
   hosts: cluster_slave
   vars:
     swapfile: '/swapfile'
-    swapsize: 1G
+    swapsize: 40G
   tasks:
 
   - name: Check if the swapfile is already enabled
