@@ -22,7 +22,7 @@ def get_clients():
     project_id = os.environ['OS_PROJECT_ID']
     project_name = os.environ['OS_PROJECT_NAME']
     auth_url = os.environ['OS_AUTH_URL']
-    user_domain_name = os.environ['OS_USER_DOMAIN_NAME'] 
+    user_domain_name = os.environ['OS_USER_DOMAIN_NAME']
     nova_client = client.Client(version, un, pw, project_id, auth_url, user_domain_name=user_domain_name)
     cinder_client = cinderclient.Client(version, un, pw, project_name, auth_url, user_domain_name=user_domain_name)
     return nova_client, cinder_client
@@ -33,20 +33,20 @@ def wait_for_state(client, type, instance_id, tgt_state):
     while True:
         cur_state = getattr(client, type).get(instance_id).status
         if cur_state in tgt_states:
-            print '    state now %s' % cur_state
+            print('    state now %s' % cur_state)
             break
 
         if cur_state == 'error':
             raise RuntimeError('Instance in "error" state, launch failed')
 
-        print '    current state: %s, waiting for: %s' % (cur_state, tgt_state)
+        print('    current state: %s, waiting for: %s' % (cur_state, tgt_state))
         time.sleep(5)
 
 def exec_cmd(cmd, split=True):
     """
     Execute the shell command 'cmd', and return the output
     """
-    print "Running the command '%s'" % cmd
+    print("Running the command '%s'" % cmd)
 
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     data, _ = process.communicate()
@@ -159,10 +159,10 @@ def delete_sec_group(client, name):
 def delete_sec_group_rules(nova_client, name):
     sg = find_security_group_by_name(nova_client, name)
     if not sg:
-        print "    No security group %s found, no rules deleted" % name
+        print("    No security group %s found, no rules deleted" % name)
         return
     for rule in sg.rules:
-        print "    deleting rule %s " % rule['id']
+        print("    deleting rule %s " % rule['id'])
         nova_client.security_group_rules.delete(rule['id'])
 
 
@@ -216,14 +216,14 @@ def create_vm(client, name, image_id, flavor_id, key_name, sec_groups, network_i
 
 def delete_vm(instance):
     instance.delete()
-    print "    deleted instance %s" % instance.id
+    print("    deleted instance %s" % instance.id)
 
 
 def wait_for_deletion(client, object_type, instance_id):
     while True:
         try:
             getattr(client, object_type).get(instance_id)
-            print '    object %s still exists' % instance_id
+            print('    object %s still exists' % instance_id)
             time.sleep(5)
         except:
             # object not found anymore
@@ -256,7 +256,7 @@ def create_and_attach_volume(nova_client, cinder_client, prov_state, instance,
                              name, size, dev, async=False):
     volume = cinder_client.volumes.create(size, name=name)
     prov_state['volume.%s.id' % name] = volume.id
-    print '    created volume %s' % volume.id
+    print('    created volume %s' % volume.id)
 
     wait_for_state(cinder_client, 'volumes', volume.id, 'available')
     print '    attaching volume %s to %s' % (volume.id, instance.id)
@@ -269,7 +269,7 @@ def create_and_attach_volume(nova_client, cinder_client, prov_state, instance,
 
 def attach_volume(nova_client, cinder_client, instance, volume, dev, async=False):
     wait_for_state(cinder_client, 'volumes', volume.id, 'available')
-    print '    attaching volume %s to %s' % (volume.id, instance.id)
+    print('    attaching volume %s to %s' % (volume.id, instance.id))
     nova_client.volumes.create_server_volume(instance.id, volume.id, dev)
     if not async:
         wait_for_state(cinder_client, 'volumes', volume.id, 'in-use')
@@ -294,7 +294,7 @@ def delete_volume_by_id(client, vol_id, wait_for_deletion=False):
     if wait_for_deletion:
         status = 'deleting'
         while status == 'deleting':
-            print "    waiting for deletion"
+            print("    waiting for deletion")
             status = ''
             for vol in client.volumes.list():
                 if vol.id == vol_id:
@@ -348,9 +348,9 @@ def associate_floating_address(nova_client, vm, floating_ip='auto'):
             # if all are taken, allocate a new one
             if not free_fip:
                 free_fip = nova_client.floating_ips.create(nova_client.floating_ip_pools.list()[0].name)
-                print '    no free IPs, allocated a new IP for the project: %s' % free_fip['Floating IP Address']
+                print('    no free IPs, allocated a new IP for the project: %s' % free_fip['Floating IP Address'])
 
-            print '    selected free IP: %s' % free_fip['Floating IP Address']
+            print('    selected free IP: %s' % free_fip['Floating IP Address'])
 
             # associate the ip with the server
             # there is a potential race here, so minimize the risk by checking if we actually got the ip
@@ -363,8 +363,8 @@ def associate_floating_address(nova_client, vm, floating_ip='auto'):
                     if fip.instance_id == vm.id:
                         return fip
                     else:
-                        print '    selected IP was grabbed for another VM: %s %s' % (fip.ip, fip.instance_id)
-                        print '    retrying to auto-associate'
+                        print('    selected IP was grabbed for another VM: %s %s' % (fip.ip, fip.instance_id))
+                        print('    retrying to auto-associate')
                         break
 
     raise RuntimeError('Invalid floating IP specified: %s' % floating_ip)

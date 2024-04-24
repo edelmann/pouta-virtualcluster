@@ -37,7 +37,7 @@ class Cluster(object):
         self.config = config
         self.nova_client = nova_client
         self.cinder_client = cinder_client
-        if re.match('[a-zA-Z\d-]{1,57}$', config['cluster']['name']):
+        if re.match('[a-zA-Z0-9-]{1,57}$', config['cluster']['name']):
             self.name = config['cluster']['name']
         else:
             raise RuntimeError('Cluster name can only contain characters a-z, 0-9 and "-"')
@@ -116,8 +116,7 @@ class Cluster(object):
                 if instance.id in [x['server_id'] for x in ex_vol.attachments]:
                     print("    volume %s already attached" % vol_name)
                 else:
-                    print("    attaching existing volume %s with size %s as device %s" % ()
-                        ex_vol.name, ex_vol.size, device)
+                    print("    attaching existing volume %s with size %s as device %s" % (ex_vol.name, ex_vol.size, device))
                     oaw.attach_volume(self.nova_client, self.cinder_client, instance, ex_vol, device, async=True)
 
             else:
@@ -362,49 +361,49 @@ class Cluster(object):
             print "    no existing resources found"
 
     def up(self, num_nodes):
-        print
-        print "Provisioning security groups"
+        print()
+        print("Provisioning security groups")
         self.__provision_sec_groups()
 
-        print
-        print "Provisioning server group"
+        print()
+        print("Provisioning server group")
         self.__provision_server_group()
 
-        print
-        print "Provisioning cluster frontend"
+        print()
+        print("Provisioning cluster frontend")
         self.__provision_frontend()
 
-        print
-        print "Provisioning %d cluster nodes" % num_nodes
+        print()
+        print("Provisioning %d cluster nodes" % num_nodes)
         self.__provision_nodes(num_nodes)
 
         # only wait for attaching if there are volumes to be attached.
         if 'volumes' in self.config['node']:
-            print
-            print "Checking volume attach state"
+            print()
+            print("Checking volume attach state")
             for node in self.nodes:
                 for vol in self.volumes:
                     if not vol.name.startswith(node.name + '/'):
                         continue
-                    print "    %s" % vol.name
+                    print("    %s" % vol.name)
                     oaw.wait_for_state(self.cinder_client, 'volumes', vol.id, 'in-use')
-                    print
+                    print()
 
 
     def add(self, num_nodes):
-        print
-        print "Provisioning %d cluster nodes" % num_nodes
+        print()
+        print("Provisioning %d cluster nodes" % num_nodes)
         new_nodes = self.__provision_nodes_add(num_nodes)
 
-        print
-        print "Checking volume attach state"
+        print()
+        print("Checking volume attach state")
         for node in new_nodes:
             for vol in self.volumes:
                 if not vol.name.startswith(node.name + '/'):
                     continue
-                print "    %s" % vol.name
+                print("    %s" % vol.name)
                 oaw.wait_for_state(self.cinder_client, 'volumes', vol.id, 'in-use')
-                print
+                print()
 
         return new_nodes
 
@@ -413,17 +412,17 @@ class Cluster(object):
         # take nodes down in reverse order
         for node in self.nodes[::-1]:
             if clean_shutdown:
-                print "Shutting down and deleting %s" % node.name
+                print("Shutting down and deleting %s" % node.name)
                 oaw.shutdown_vm(self.nova_client, node)
             else:
-                print "Deleting %s" % node.name
+                print("Deleting %s" % node.name)
             oaw.delete_vm(node)
             self.__prov_log('delete', 'vm', node.id, node.name)
             time.sleep(1)
 
         # check that all the nodes have actually been deleted
         for node in self.nodes[::-1]:
-            print "Checking deletion state for %s" % node.name
+            print("Checking deletion state for %s" % node.name)
             oaw.wait_for_deletion(self.nova_client, 'servers', node.id)
 
         self.nodes = []
@@ -431,10 +430,10 @@ class Cluster(object):
         # take the frontend down last
         if self.frontend:
             if clean_shutdown:
-                print "Shutting down and deleting %s " % self.frontend.name
+                print("Shutting down and deleting %s " % self.frontend.name)
                 oaw.shutdown_vm(self.nova_client, self.frontend)
             else:
-                print "Deleting %s " % self.frontend.name
+                print("Deleting %s " % self.frontend.name)
             oaw.delete_vm(self.frontend)
             oaw.wait_for_deletion(self.nova_client, 'servers', self.frontend.id)
             self.__prov_log('delete', 'vm', self.frontend.id, self.frontend.name)
@@ -442,59 +441,59 @@ class Cluster(object):
 
     def destroy_volumes(self, grace_time=10):
         if self.frontend or len(self.nodes) > 0:
-            print
-            print "ERROR: cluster seems to be up, refusing to delete volumes"
-            print
+            print()
+            print("ERROR: cluster seems to be up, refusing to delete volumes")
+            print()
             return
 
         if len(self.volumes) == 0:
-            print "No volumes found to destroy"
+            print("No volumes found to destroy")
             return
 
-        print "Destroying all %d volumes (=persistent data) for cluster '%s'" % (len(self.volumes), self.name)
-        print "Hit ctrl-c now to abort"
+        print("Destroying all %d volumes (=persistent data) for cluster '%s'" % (len(self.volumes), self.name))
+        print("Hit ctrl-c now to abort")
         if grace_time > 0:
-            print "Starting in ",
+            print("Starting in ",)
             for i in range(grace_time, -1, -1):
-                print i, " ",
+                print(i, " ",)
                 sys.stdout.flush()
                 time.sleep(1)
             print ""
 
         # delete volumes in reverse order, frontend last
         for vol in self.volumes[::-1]:
-            print "Deleting volume %s %s" % (vol.id, vol.name)
+            print("Deleting volume %s %s" % (vol.id, vol.name))
             oaw.delete_volume_by_id(self.cinder_client, vol.id, True)
             self.__prov_log('delete', 'volume', vol.id, vol.name)
 
     def cleanup(self):
-        print "Cleaning server and security groups"
+        print("Cleaning server and security groups")
 
         if self.frontend or len(self.nodes) > 0:
-            print
-            print "ERROR: cluster seems to be up, refusing to clean up server and security groups"
-            print
+            print()
+            print("ERROR: cluster seems to be up, refusing to clean up server and security groups")
+            print()
             return
 
-        print "    deleting server group %s" % self.name
+        print("    deleting server group %s" % self.name)
         try:
             sg_id = oaw.delete_server_group(self.nova_client, self.name)
             self.__prov_log('delete', 'server-group', sg_id, self.name)
         except RuntimeError as e:
-            print "    %s" % e
+            print("    %s" % e)
 
         for postfix in ['ext', 'int']:
             sg_name = '%s-%s' % (self.name, postfix)
-            print "    deleting security group %s" % sg_name
+            print("    deleting security group %s" % sg_name)
             try:
                 sg_id = oaw.delete_sec_group(self.nova_client, sg_name)
                 self.__prov_log('delete', 'sec_group', sg_id, sg_name)
             except RuntimeError as e:
-                print "    %s" % e
+                print("    %s" % e)
 
     def reset_nodes(self):
         for node in self.nodes:
-            print "Hard resetting %s" % node.name
+            print("Hard resetting %s" % node.name)
             node.reboot(reboot_type='HARD')
             # rate limit on resets, otherwise API will give an error
             time.sleep(3)
@@ -580,7 +579,7 @@ class Cluster(object):
                         else:
                             vol_vars.append('shared_data_device=/dev/vdb')
                     else:
-                        print 'WARN: unknown magic volume name %s ' % vol_spec['name']
+                        print('WARN: unknown magic volume name %s ' % vol_spec['name'])
             return vol_vars
 
         # generate frontend groups
@@ -637,15 +636,15 @@ class Cluster(object):
             rules = [x.strip() for x in rf.readlines()]
 
         sg_name = self.name + '-ext'
-        print "Updating firewall rules in sec-group %s" % sg_name
+        print("Updating firewall rules in sec-group %s" % sg_name)
 
-        print "    removing old rules"
+        print("    removing old rules")
         oaw.delete_sec_group_rules(self.nova_client, sg_name)
         sg = oaw.find_security_group_by_name(self.nova_client, sg_name)
         for rule in rules:
             if not len(rule) or rule.startswith('#'):
                 continue
-            print "    adding rule '%s'" % rule
+            print("    adding rule '%s'" % rule)
             proto, from_port, to_port, cidr = rule.strip().split()
             oaw.add_sec_group_rule(self.nova_client, sg.id, ip_protocol=proto, from_port=from_port,
                                    to_port=to_port, cidr=cidr)
@@ -657,9 +656,9 @@ def update_ansible_inventory(cluster):
         for line in cluster.generate_ansible_inventory():
             f.write(line)
             f.write('\n')
-    print
-    print "Updated ansible inventory file 'ansible-hosts'"
-    print
+    print()
+    print("Updated ansible inventory file 'ansible-hosts'")
+    print()
 
 
 def check_connectivity(hosts=[]):
@@ -681,9 +680,9 @@ def check_connectivity(hosts=[]):
 
     if os.path.isfile('key.priv'):
         cmd += ' --private-key key.priv'
-    print cmd
+    print(cmd)
     while subprocess.call(shlex.split(cmd)) != 0:
-        print "    no full connectivity yet, waiting a bit and retrying"
+        print("    no full connectivity yet, waiting a bit and retrying")
         time.sleep(2)
 
 
@@ -691,7 +690,7 @@ def run_main_playbook():
     cmd = "ansible-playbook ../ansible/playbooks/site.yml -i ansible-hosts -f %d" % NUM_PARALLEL_ANSIBLE_TASKS
     if os.path.isfile('key.priv'):
         cmd += ' --private-key key.priv'
-    print cmd
+    print(cmd)
     res = subprocess.call(shlex.split(cmd))
     if res:
         raise RuntimeError('Ansible exited with error code: %d' % res)
@@ -703,54 +702,54 @@ def run_bootstrap(hosts=[]):
         cmd += ' --private-key key.priv'
     if hosts:
         cmd += " --limit=%s" % ",".join(hosts)
-    print cmd
+    print(cmd)
     res = subprocess.call(shlex.split(cmd))
     if res:
         raise RuntimeError('Ansible exited with error code: %d' % res)
 
 
 def run_add_key(key, user):
-    print
-    print 'Adding %s to authorized_keys for user %s' % (key, user)
-    print
+    print()
+    print('Adding %s to authorized_keys for user %s' % (key, user))
+    print()
     cmd = "ansible-playbook ../ansible/playbooks/add_ssh_key.yml -i ansible-hosts -f %d" % NUM_PARALLEL_ANSIBLE_TASKS
     cmd += ' --extra-vars "key_user=%s key_file=%s" ' % (user, key)
     if os.path.isfile('key.priv'):
         cmd += ' --private-key key.priv'
-    print cmd
+    print(cmd)
     res = subprocess.call(shlex.split(cmd))
     if res:
         raise RuntimeError('Ansible exited with error code: %d' % res)
 
 
 def run_configuration():
-    print
-    print "Checking the connectivity to the cluster"
-    print
+    print()
+    print("Checking the connectivity to the cluster")
+    print()
     check_connectivity()
-    print
-    print "Run the main playbook to configure the cluster"
-    print
+    print()
+    print("Run the main playbook to configure the cluster")
+    print()
     run_main_playbook()
 
 
 def run_first_time_setup(hosts=[]):
-    print
-    print "First we'll check the connectivity to the cluster"
-    print
+    print()
+    print("First we'll check the connectivity to the cluster")
+    print()
     check_connectivity(hosts)
-    print
-    print "When all hosts are up, proceed with some bootstrap actions followed by a reboot if necessary"
-    print "(this may take a while)"
-    print
+    print()
+    print("When all hosts are up, proceed with some bootstrap actions followed by a reboot if necessary")
+    print("(this may take a while)")
+    print()
     run_bootstrap(hosts)
 
-    print "Sleeping for a while before starting polling the hosts after the bootstrap"
+    print("Sleeping for a while before starting polling the hosts after the bootstrap")
     time.sleep(3)
     check_connectivity()
-    print
-    print "Run the main playbook to configure the cluster"
-    print
+    print()
+    print("Run the main playbook to configure the cluster")
+    print()
     run_main_playbook()
 
 
@@ -780,13 +779,13 @@ def get_endpoint_instructions(cluster, service_ip):
 def print_usage_instructions(cluster):
     service_ip = cluster.get_public_ip(cluster.frontend)
     if not service_ip:
-        print "Looks like the frontend does not have a public IP."
-        print "To access the cluster, you need to be able to access it "
-        print "from within the project internal network."
+        print("Looks like the frontend does not have a public IP.")
+        print("To access the cluster, you need to be able to access it ")
+        print("from within the project internal network.")
         service_ip = cluster.get_private_ip(cluster.frontend)
     for line in get_endpoint_instructions(cluster, service_ip):
-        print line
-    print "See README.rst for examples on testing the installation"
+        print(line)
+    print("See README.rst for examples on testing the installation")
 
 
 def main():
@@ -824,13 +823,13 @@ def main():
     nova_client, cinder_client = oaw.get_clients()
 
     # load the yaml configuration
-    print
-    print "Loading cluster definition from cluster.conf"
+    print()
+    print("Loading cluster definition from cluster.conf")
     with open('cluster.yml', 'r') as f:
         conf = yaml.load(f)
-    print "    %12s: %s" % ('cluster name', conf['cluster']['name'])
-    print "    %12s: %s" % ('description', conf['cluster']['description'])
-    print
+    print("    %12s: %s" % ('cluster name', conf['cluster']['name']))
+    print("    %12s: %s" % ('description', conf['cluster']['description']))
+    print()
 
     # create Cluster instance and load state from OpenStack
     cluster = Cluster(conf, nova_client, cinder_client)
@@ -841,28 +840,28 @@ def main():
     # bring cluster up
     if command == 'up':
         if cluster.frontend:
-            print "Cluster is already running"
+            print("Cluster is already running")
             sys.exit(1)
 
         if args.num_nodes is None or args.num_nodes < 0:
-            print
-            print "ERROR: 'up' requires number of nodes as an argument"
-            print
+            print()
+            print("ERROR: 'up' requires number of nodes as an argument")
+            print()
             sys.exit(1)
 
         cluster.up(args.num_nodes)
         update_ansible_inventory(cluster)
-        print "Cluster has been started and resources provisioned."
-        print "Next we'll use 'ansible' to install and configure software"
+        print("Cluster has been started and resources provisioned.")
+        print("Next we'll use 'ansible' to install and configure software")
 
         # wait for a while for the last nodes to boot
         time.sleep(5)
 
         run_first_time_setup()
 
-        print
-        print "Cluster setup done."
-        print
+        print()
+        print("Cluster setup done.")
+        print()
 
         # refresh cluster state so that all provisioned aspects like floating IP addresses are present
         cluster.refresh_state()
@@ -871,20 +870,20 @@ def main():
     # Add nodes to the cluster
     elif command == 'add':
         if not cluster.frontend:
-            print "No cluster is running"
+            print("No cluster is running")
             sys.exit(1)
 
         if not args.num_nodes:
-            print
-            print "ERROR: 'add' requires number of nodes as an argument"
-            print
+            print()
+            print("ERROR: 'add' requires number of nodes as an argument")
+            print()
             sys.exit(1)
         
         new_nodes = cluster.add(args.num_nodes)
         update_ansible_inventory(cluster)
         #update_ansible_inventory(cluster, "ansible-newnodes", new_nodes)
-        print "Nodes has been started and resources provisioned."
-        print "Next we'll use 'ansible' to install and configure software"
+        print("Nodes has been started and resources provisioned.")
+        print("Next we'll use 'ansible' to install and configure software")
 
         # wait for a while for the last nodes to boot
         time.sleep(5)
@@ -898,15 +897,15 @@ def main():
 
     # bring cluster down
     elif command == 'down':
-        print
-        print "Shutting cluster down, starting with last nodes"
-        print
+        print()
+        print("Shutting cluster down, starting with last nodes")
+        print()
         cluster.down(clean_shutdown=(not args.unclean))
         update_ansible_inventory(cluster)
 
     # run ansible configuration scripts on existing cluster
     elif command == 'configure':
-        print "Configuring existing cluster with ansible"
+        print("Configuring existing cluster with ansible")
         update_ansible_inventory(cluster)
         run_configuration()
         print_usage_instructions(cluster)
@@ -941,19 +940,19 @@ def main():
 
     # print info about provisioned resources
     elif command == 'info':
-        print
+        print()
         for line in cluster.get_info():
-            print line
+            print(line)
     # wipe all provisioned resources, no questions asked
     elif command == 'wipe':
         if not args.yes_i_know_what_im_doing:
-            print
-            print 'ERROR: Confirmation option missing, refusing to wipe'
-            print 'See poutacluster wipe -h'
-            print
+            print()
+            print('ERROR: Confirmation option missing, refusing to wipe')
+            print('See poutacluster wipe -h')
+            print()
             sys.exit(1)
 
-        print 'Wiping cluster'
+        print('Wiping cluster')
         cluster.down(clean_shutdown=False)
         cluster.destroy_volumes(grace_time=0)
         cluster.cleanup()
@@ -982,4 +981,4 @@ if __name__ == '__main__':
         main()
     finally:
         end_ts = time.time()
-        print "Run took %d seconds" % int(end_ts - start_ts)
+        print("Run took %d seconds" % int(end_ts - start_ts))
