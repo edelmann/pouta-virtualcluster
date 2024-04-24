@@ -72,13 +72,13 @@ class Cluster(object):
             network = os.environ['OS_TENANT_NAME']
         network_id = oaw.check_network_exists(self.nova_client, network)
 
-        print '    creating %s: %s  - %s' % (name, spec['image'], spec['flavor'])
-        print "    using network '%s'" % network
-        print "    and key '%s'" % spec['sec-key']
+        print('    creating %s: %s  - %s' % (name, spec['image'], spec['flavor']))
+        print("    using network '%s'" % network)
+        print("    and key '%s'" % spec['sec-key'])
         instance_id = oaw.create_vm(self.nova_client, name, image_id, flavor_id, spec['sec-key'], sec_groups,
                                     network_id, server_group_id)
 
-        print '    instance %s created' % instance_id
+        print('    instance %s created' % instance_id)
         self.__prov_log('create', 'vm', instance_id, name)
 
         instance = oaw.get_instance(self.nova_client, instance_id)
@@ -87,12 +87,12 @@ class Cluster(object):
 
     def __provision_vm_addresses(self, instance, spec):
 
-        print '    instance internal IP: %s' % oaw.get_addresses(instance)[0]
+        print('    instance internal IP: %s' % oaw.get_addresses(instance)[0])
         if 'public-ip' in spec.keys():
             ip = spec['public-ip']
-            print "    associating public IP %s" % ip
+            print("    associating public IP %s" % ip)
             fip = oaw.associate_floating_address(self.nova_client, instance, ip)
-            print "    associated public IP %s" % fip['Floating IP Address']
+            print("    associated public IP %s" % fip['Floating IP Address'])
 
     def __provision_volumes(self, instance, volspec):
         vd = chr(ord('c'))
@@ -114,14 +114,14 @@ class Cluster(object):
             if ex_vol:
                 # we have an existing volume, let's check if we need to attach it
                 if instance.id in [x['server_id'] for x in ex_vol.attachments]:
-                    print "    volume %s already attached" % vol_name
+                    print("    volume %s already attached" % vol_name)
                 else:
-                    print "    attaching existing volume %s with size %s as device %s" % (
+                    print("    attaching existing volume %s with size %s as device %s" % ()
                         ex_vol.name, ex_vol.size, device)
                     oaw.attach_volume(self.nova_client, self.cinder_client, instance, ex_vol, device, async=True)
 
             else:
-                print "    creating and attaching volume %s with size %s as device %s" % (vol_name, vol_size, device)
+                print("    creating and attaching volume %s with size %s as device %s" % (vol_name, vol_size, device))
                 vol = oaw.create_and_attach_volume(self.nova_client, self.cinder_client, {}, instance,
                                                    vol_name, vol_size, dev=device, async=True)
                 self.__prov_log('create', 'volume', vol.id, vol_name)
@@ -132,14 +132,14 @@ class Cluster(object):
         try:
             oaw.check_secgroup_exists(self.nova_client, sg_name_ext)
         except RuntimeError:
-            print
-            print '    Creating security group for external access'
-            print '    NOTE: you can modify the rules afterwards through '
-            print
-            print '      nova secgroup-add-rule %s ...' % sg_name_ext
-            print
-            print '      or through the web interface'
-            print
+            print()
+            print('    Creating security group for external access')
+            print('    NOTE: you can modify the rules afterwards through ')
+            print()
+            print('      nova secgroup-add-rule %s ...' % sg_name_ext)
+            print()
+            print('      or through the web interface')
+            print()
             sg_id, sg_name = oaw.create_sec_group(self.nova_client, sg_name_ext,
                                                  'Security group for %s external access' % self.name)
             self.__prov_log('create', 'sec-group', sg_id, sg_name)
@@ -152,7 +152,7 @@ class Cluster(object):
                 ext_rules = self.config['cluster']['ext-secgroup-rules']
 
             for rule in ext_rules:
-                print "    adding rule '%s'" % rule
+                print("    adding rule '%s'" % rule)
                 proto, from_port, to_port, cidr = rule.strip().split()
                 oaw.add_sec_group_rule(self.nova_client, sg_id, ip_protocol=proto, from_port=from_port,
                                        to_port=to_port, cidr=cidr)
@@ -162,8 +162,8 @@ class Cluster(object):
         try:
             oaw.check_secgroup_exists(self.nova_client, sg_name_int)
         except RuntimeError:
-            print
-            print '    No security group for internal access exists, creating it'
+            print()
+            print('    No security group for internal access exists, creating it')
             sg_id, sg_name = oaw.create_sec_group(self.nova_client, sg_name_int,
                                                   'Security group for %s internal access' % self.name)
             self.__prov_log('create', 'sec-group', sg_id, sg_name)
@@ -185,14 +185,14 @@ class Cluster(object):
 
     def __provision_server_group(self):
         if not self.server_group_policy:
-            print '    server group disabled'
+            print('    server group disabled')
             return
 
         try:
             oaw.check_server_group_exists(self.nova_client, self.name, [self.server_group_policy])
         except RuntimeError:
-            print
-            print "No server group for %s exists, creating one with '%s' policy" % (self.name, self.server_group_policy)
+            print()
+            print("No server group for %s exists, creating one with '%s' policy" % (self.name, self.server_group_policy))
             sg_id = oaw.create_server_group(self.nova_client, self.name, [self.server_group_policy])
             self.__prov_log('create', 'server-group', sg_id, self.name)
 
@@ -200,7 +200,7 @@ class Cluster(object):
         fe_name = self.name + '-tron'
 
         if self.frontend:
-            print '    %s already provisioned' % fe_name
+            print('    %s already provisioned' % fe_name)
         else:
             self.frontend = self.__provision_vm(fe_name, [self.name + '-ext', self.name + '-int'],
                                                 self.config['frontend'],
@@ -230,7 +230,7 @@ class Cluster(object):
                 if n.name == node_name:
                     node = n
             if node:
-                print '    %s already provisioned' % node_name
+                print('    %s already provisioned' % node_name)
             else:
                 node = self.__provision_vm(node_name, [self.name + '-int'],
                                            self.config['node'],
@@ -242,13 +242,13 @@ class Cluster(object):
                 nnew += 1
             i += 1
 
-            print
+            print()
 
         # synchronous part after nodes are active
         # indexed access because we'll replace the node instances with updated versions
         for i in range(0, len(new_nodes)):
             node = new_nodes[i]
-            print '    setup network and volumes for %s' % node.name
+            print('    setup network and volumes for %s' % node.name)
             oaw.wait_for_state(self.nova_client, 'servers', node.id, 'ACTIVE')
             # reload information after instance has reached active state
             node = oaw.get_instance(self.nova_client, node.id)
@@ -257,7 +257,7 @@ class Cluster(object):
             self.__provision_vm_addresses(node, self.config['node'])
             if self.config['node'].get('volumes'):
                 self.__provision_volumes(node, self.config['node']['volumes'])
-            print
+            print()
 
         return new_nodes
 
@@ -273,7 +273,7 @@ class Cluster(object):
                 if n.name == node_name:
                     node = n
             if node:
-                print '    %s already provisioned' % node_name
+                print('    %s already provisioned' % node_name)
             else:
                 node = self.__provision_vm(node_name, [self.name + '-int'],
                                            self.config['node'],
@@ -281,13 +281,13 @@ class Cluster(object):
                                            server_group_name=self.name)
                 self.nodes.append(node)
                 oaw.wait_for_state(self.nova_client, 'servers', node.id, 'BUILD|ACTIVE')
-            print
+            print()
 
         # synchronous part after nodes are active
         # indexed access because we'll replace the node instances with updated versions
         for i in range(0, len(self.nodes)):
             node = self.nodes[i]
-            print '    setup network and volumes for %s' % node.name
+            print('    setup network and volumes for %s' % node.name)
             oaw.wait_for_state(self.nova_client, 'servers', node.id, 'ACTIVE')
             # reload information after instance has reached active state
             node = oaw.get_instance(self.nova_client, node.id)
@@ -295,7 +295,7 @@ class Cluster(object):
             self.__provision_vm_addresses(node, self.config['node'])
             if self.config['node'].get('volumes'):
                 self.__provision_volumes(node, self.config['node']['volumes'])
-            print
+            print()
 
     @staticmethod
     def __filter_volumes_for_node(volumes, vm_name):
