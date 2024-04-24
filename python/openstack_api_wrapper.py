@@ -16,14 +16,14 @@ import json
 
 
 def get_clients():
-    version = "2" # os.environ['OS_IDENTITY_API_VERSION']
+    version = os.environ['OS_IDENTITY_API_VERSION']
     un = os.environ['OS_USERNAME']
     pw = os.environ['OS_PASSWORD']
     project_id = os.environ['OS_PROJECT_ID']
     project_name = os.environ['OS_PROJECT_NAME']
     auth_url = os.environ['OS_AUTH_URL']
     user_domain_name = os.environ['OS_USER_DOMAIN_NAME']
-    nova_client = client.Client(version, un, pw, project_id, auth_url, user_domain_name=user_domain_name)
+    nova_client = client.Client("2.0", un, pw, project_id, auth_url, user_domain_name=user_domain_name)
     cinder_client = cinderclient.Client(version, un, pw, project_name, auth_url, user_domain_name=user_domain_name)
     return nova_client, cinder_client
 
@@ -50,6 +50,8 @@ def exec_cmd(cmd, split=True):
 
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     data, _ = process.communicate()
+    if isinstance(data, bytes):
+        data = data.decode('utf-8')
     if split:
         return data.strip().split('\n')
     else:
@@ -253,25 +255,25 @@ def get_volume(client, volume_id):
 
 
 def create_and_attach_volume(nova_client, cinder_client, prov_state, instance,
-                             name, size, dev, async=False):
+                             name, size, dev, a_sync=False):
     volume = cinder_client.volumes.create(size, name=name)
     prov_state['volume.%s.id' % name] = volume.id
     print('    created volume %s' % volume.id)
 
     wait_for_state(cinder_client, 'volumes', volume.id, 'available')
-    print '    attaching volume %s to %s' % (volume.id, instance.id)
+    print('    attaching volume %s to %s' % (volume.id, instance.id))
     nova_client.volumes.create_server_volume(instance.id, volume.id, dev)
-    if not async:
+    if not a_sync:
         wait_for_state(cinder_client, 'volumes', volume.id, 'in-use')
 
     return volume
 
 
-def attach_volume(nova_client, cinder_client, instance, volume, dev, async=False):
+def attach_volume(nova_client, cinder_client, instance, volume, dev, a_sync=False):
     wait_for_state(cinder_client, 'volumes', volume.id, 'available')
     print('    attaching volume %s to %s' % (volume.id, instance.id))
     nova_client.volumes.create_server_volume(instance.id, volume.id, dev)
-    if not async:
+    if not a_sync:
         wait_for_state(cinder_client, 'volumes', volume.id, 'in-use')
 
 

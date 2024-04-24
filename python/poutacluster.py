@@ -117,12 +117,12 @@ class Cluster(object):
                     print("    volume %s already attached" % vol_name)
                 else:
                     print("    attaching existing volume %s with size %s as device %s" % (ex_vol.name, ex_vol.size, device))
-                    oaw.attach_volume(self.nova_client, self.cinder_client, instance, ex_vol, device, async=True)
+                    oaw.attach_volume(self.nova_client, self.cinder_client, instance, ex_vol, device, a_sync=True)
 
             else:
                 print("    creating and attaching volume %s with size %s as device %s" % (vol_name, vol_size, device))
                 vol = oaw.create_and_attach_volume(self.nova_client, self.cinder_client, {}, instance,
-                                                   vol_name, vol_size, dev=device, async=True)
+                                                   vol_name, vol_size, dev=device, a_sync=True)
                 self.__prov_log('create', 'volume', vol.id, vol_name)
                 self.volumes.append(vol)
 
@@ -314,7 +314,7 @@ class Cluster(object):
         self.nodes = updated_nodes
 
     def load_provisioned_state(self):
-        print "Loading cluster state from OpenStack"
+        print("Loading cluster state from OpenStack")
 
         # reset the state
         self.frontend = None
@@ -325,27 +325,27 @@ class Cluster(object):
         all_vols = self.cinder_client.volumes.list()
 
         fe_name = '%s-tron' % self.name
-        existing_nodes = filter(lambda lx: lx.name == fe_name, vms)
+        existing_nodes = [ vm for vm in vms if vm.name == fe_name ] #filter(lambda lx: lx.name == fe_name, vms)
         if len(existing_nodes) > 1:
             raise RuntimeError('More than one frontend VM with the name %s found, unable to continue' % fe_name)
         if len(existing_nodes) == 1:
             self.frontend = existing_nodes[0]
-            print '    found frontend %s' % self.frontend.name
+            print('    found frontend %s' % self.frontend.name)
 
         # find volumes created for the frontend
         fe_vols = self.__filter_volumes_for_node(all_vols, fe_name)
         for vol in fe_vols:
-            print "    found volume %s" % vol.name
+            print("    found volume %s" % vol.name)
         self.volumes.extend(fe_vols)
 
         # find cluster nodes
         node_base = '%s-node' % self.name
         for i in range(1, 100):
             node_name = '%s%02d' % (node_base, i)
-            existing_nodes = filter(lambda lx: lx.name == node_name, vms)
+            existing_nodes = [ vm for vm in vms if vm.name == node_name ] # filter(lambda lx: lx.name == node_name, vms)
             if len(existing_nodes) == 1:
                 node = existing_nodes[0]
-                print '    found node %s' % node.name
+                print('    found node %s' % node.name)
                 self.nodes.append(node)
             elif len(existing_nodes) > 1:
                 raise RuntimeError('More than one VM with the name %s found, unable to continue' % node_name)
@@ -353,12 +353,12 @@ class Cluster(object):
             # find volumes created for the node
             node_vols = self.__filter_volumes_for_node(all_vols, node_name)
             for vol in node_vols:
-                print "    found volume %s" % vol.name
+                print("    found volume %s" % vol.name)
 
             self.volumes.extend(node_vols)
 
         if not self.frontend and len(self.nodes) == 0 and len(self.volumes) == 0:
-            print "    no existing resources found"
+            print("    no existing resources found")
 
     def up(self, num_nodes):
         print()
@@ -458,7 +458,7 @@ class Cluster(object):
                 print(i, " ",)
                 sys.stdout.flush()
                 time.sleep(1)
-            print ""
+            print("")
 
         # delete volumes in reverse order, frontend last
         for vol in self.volumes[::-1]:
