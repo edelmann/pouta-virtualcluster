@@ -32,7 +32,7 @@
     path: "{{ slurm_rpms }}"
     state: directory
     mode: 0755
-    owner: cloud-user
+    owner: "{{ remoteuser }}"
 
 - name: Copy the RPMs to their destination
   shell: "cp {{ slurm_rpmbuild }}/RPMS/x86_64/slurm*.x86_64.rpm {{ slurm_rpms }}/"

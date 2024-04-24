@@ -1,29 +1,32 @@
 ---
+
 # Key used with the admin node
-adminkey: eriknew
+adminkey: meh
 
 # Flavor of the Bastion/admin node
-admin_flavor:  standard.tiny
+admin_flavor:  standard.small
 
 # Image (OS) if the admin node
-admin_image: CentOS-7
+admin_image: AlmaLinux-9
+remoteuser: almalinux
 
 # Key used with the cluster
-clusterkey: eriknew
+clusterkey: cluster-key
 
 # Flavor of the cluster frontend
-frontend_flavor: standard.tiny
-frontend_image: CentOS-7
+frontend_flavor: standard.medium
+frontend_image: AlmaLinux-9
 
 # Flavor of the cluster worker nodes
-wn_flavor: standard.tiny
+wn_flavor: hpc.6.56core
 #wn_flavor: standard.small
-wn_image: CentOS-7
+wn_image: AlmaLinux-9
 
 # Worker node local disk
-wn_local_disk: 12
+wn_local_disk: 616
 
-network: project_2001054
+project: dojkim
+network: dojkim
 
 
-openstackrc: ~/.config/project_2001054-openrc.sh
+openstackrc: ~/alice/alice-tron/admin/edelmann-openrc.sh

@@ -17,6 +17,6 @@
   shell: |
     dd if=/dev/urandom bs=1 count=1024 > {{ mungedir }}/munge.key
     chmod 0400 {{ mungedir }}/munge.key
-    chown cloud-user {{ mungedir }}/munge.key
+    chown {{ remoteuser }} {{ mungedir }}/munge.key
   args:
     creates: "{{ mungedir }}/munge.key"

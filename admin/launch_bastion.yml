@@ -34,15 +34,30 @@
       network: "{{ network }}"
       key_name: "{{ adminkey }}"
       security_groups: bastion
-    until: (bastion_result.openstack is defined) and (bastion_result.openstack.addresses.values()[0] | length > 1)
+    until: bastion_result.server is defined
     delay: 20
     retries: 50
 
+  - name: Pause to let the vm settle a bit
+    ansible.builtin.pause:
+      seconds: 7
+
+  - name: meh
+    set_fact:
+      addresses: "{{ bastion_result.server.addresses[project] }}"
+
   - name: Store the auto-allocated floating IP address for Bastion
-    set_fact: bastion_floating_ip={{ bastion_result.openstack.addresses.values()[0][1]["addr"] }}
+    set_fact:
+      bastion_floating_ip: "{{ item.addr }}"
+    when: item['OS-EXT-IPS:type'] == "floating"
+    loop: "{{ addresses }}"
+
 
   - name: Store local IP
-    set_fact: bastion_local_ip={{ bastion_result.openstack.addresses.values()[0][0]["addr"] }}
+    set_fact:
+      bastion_local_ip: "{{ item.addr }}"
+    when: item['OS-EXT-IPS:type'] == "fixed"
+    loop: "{{ addresses }}"
 
   - name: print some stuff
     debug:
@@ -54,7 +69,7 @@
       ansible_ssh_host: "{{ bastion_floating_ip }}"
       local_ip: "{{ bastion_local_ip }}" 
       groups: bastion
-      ansible_ssh_user: cloud-user
+      ansible_ssh_user: "{{ remoteuser }}"
 
   - name: Create an inventory file
     template:

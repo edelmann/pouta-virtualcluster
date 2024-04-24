@@ -11,10 +11,10 @@
     state: latest
     name: HEP_OSlibs
 
-- name: add local .ssh/*.pub files to auhtorized_keys for cloud-user
+- name: add local .ssh/*.pub files to auhtorized_keys for remoteuser
   become: yes
   lineinfile:
-    dest: ~cloud-user/.ssh/authorized_keys
+    dest: "~{{ remoteuser }}/.ssh/authorized_keys"
     line: "{{ item }}"
     create: yes
   with_lines: cat ~/.ssh/*.pub

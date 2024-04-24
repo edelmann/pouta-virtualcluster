@@ -14,9 +14,9 @@
         - PackageKit-gtk3-module
         - libcanberra-gtk2
         - nc
-        - screen
+        #- screen
         - bash-completion
-        - yum-plugin-priorities
+        #- yum-plugin-priorities
         - git
 
   - name: Set the timezone
