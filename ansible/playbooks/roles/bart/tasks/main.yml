@@ -59,7 +59,7 @@
   become: yes
   ansible.builtin.cron:
     cron_file: bart
-    job: "bart-logger && python3 /usr/local/bin/bart-registrant"
+    job: "/usr/local/bin/bart-logger && /usr/local/bin/bart-registrant"
     minute: "15"
     name: "Report usage to SGAS"
     user: root
