@@ -1,1 +1,1 @@
-squeue -o "%.18i %.9P %.8j %.8u %.2t %.10M %.6C %R"
+squeue -o "%.18i %.9P %.8j %.8u %.2t %.10M %.6C %R" | awk '{print $0; if ($5 == "R") { njobs++; ncpus += $7}}END{printf "Summary: %i jobs, using %i CPUs\n", njobs, ncpus}'
