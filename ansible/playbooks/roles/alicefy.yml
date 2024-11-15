@@ -167,7 +167,11 @@
     file: dest=~aliprod/.globus state=directory mode=700
 
   - name: Copy the certificate
-    copy: src=~/.globus//{{ item.file }} dest=~aliprod/.globus/{{ item.file }} mode={{ item.mode }}
+    copy:
+      src: "~/.globus//{{ item.file }}"
+      dest: "~aliprod/.globus/{{ item.file }}"
+      mode: "{{ item.mode }}"
+      backup: True
     with_items:
     - { file: userkey.pem, mode: 600 }
     - { file: usercert.pem, mode: 644 }
