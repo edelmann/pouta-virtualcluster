@@ -2,5 +2,6 @@
 - name: Download & Compile SLURM
   hosts: frontend
   roles:
+    - egi_trustnachors
     - bart
 

@@ -1,0 +1,13 @@
+---
+- name: Install EGI trust anchors repo
+  become: yes
+  copy:
+    src: egi_trustanchors.repo
+    dest: /etc/yum.repos.d/egi_trustanchors.repo
+
+- name: Install ca-policy-egi-core
+  become: yes
+  yum:
+    state: updated
+    name:
+      - ca-policy-egi-core
