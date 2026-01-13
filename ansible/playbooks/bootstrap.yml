@@ -46,6 +46,12 @@
       #args:
         #warn: false
 
+    - name: Update the system
+      yum:
+        name: '*'
+        state: latest
+      notify: reboot
+
     - name: disable SELinux (CentOS)
       action: selinux state=disabled
       notify: reboot
