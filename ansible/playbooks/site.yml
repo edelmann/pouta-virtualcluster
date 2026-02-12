@@ -12,6 +12,8 @@
 # common setup for master - slave
 - import_playbook: roles/cluster.yml
 
+- import_playbook: roles/dnf-automatic.yml
+
 # ALICE stuff (has be done before the gridengine stuff)
 - import_playbook: roles/alicefy.yml
 

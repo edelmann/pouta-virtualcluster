@@ -1,0 +1,46 @@
+--- 
+- name: Install dnf-automatic
+  yum:
+    state: installed
+    name: dnf-automatic
+
+- name: Set upgrade_type
+  community.general.ini_file:
+    path: /etc/dnf/automatic.conf
+    section: commands
+    option: upgrade_type
+    value: security
+
+- name: Set download_updates
+  community.general.ini_file:
+    path: /etc/dnf/automatic.conf
+    section: commands
+    option: download_updates
+    value: yes
+
+- name: Set apply_updates
+  community.general.ini_file:
+    path: /etc/dnf/automatic.conf
+    section: commands
+    option: apply_updates
+    value: yes
+
+- name: Set reboot to "never"
+  community.general.ini_file:
+    path: /etc/dnf/automatic.conf
+    section: commands
+    option: reboot
+    value: never
+
+- name: Set emit_via
+  community.general.ini_file:
+    path: /etc/dnf/automatic.conf
+    section: emitters
+    option: emit_via
+    value: motd
+
+- name: enable dnf-automatic.timer
+  service:
+    name: dnf-automatic.timer
+    enabled: yes
+    state: started

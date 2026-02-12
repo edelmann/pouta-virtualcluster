@@ -1,0 +1,6 @@
+--- 
+- name: Download & Compile SLURM
+  hosts: all
+  roles:
+    - dnf-automatic
+
