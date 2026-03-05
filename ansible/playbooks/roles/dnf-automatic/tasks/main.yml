@@ -1,10 +1,12 @@
 --- 
 - name: Install dnf-automatic
+  become: yes
   yum:
     state: installed
     name: dnf-automatic
 
 - name: Set upgrade_type
+  become: yes
   community.general.ini_file:
     path: /etc/dnf/automatic.conf
     section: commands
@@ -12,6 +14,7 @@
     value: security
 
 - name: Set download_updates
+  become: yes
   community.general.ini_file:
     path: /etc/dnf/automatic.conf
     section: commands
@@ -19,6 +22,7 @@
     value: yes
 
 - name: Set apply_updates
+  become: yes
   community.general.ini_file:
     path: /etc/dnf/automatic.conf
     section: commands
@@ -26,6 +30,7 @@
     value: yes
 
 - name: Set reboot to "never"
+  become: yes
   community.general.ini_file:
     path: /etc/dnf/automatic.conf
     section: commands
@@ -33,6 +38,7 @@
     value: never
 
 - name: Set emit_via
+  become: yes
   community.general.ini_file:
     path: /etc/dnf/automatic.conf
     section: emitters
@@ -40,6 +46,7 @@
     value: motd
 
 - name: enable dnf-automatic.timer
+  become: yes
   service:
     name: dnf-automatic.timer
     enabled: yes
