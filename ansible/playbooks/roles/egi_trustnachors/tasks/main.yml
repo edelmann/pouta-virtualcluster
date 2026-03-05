@@ -8,6 +8,6 @@
 - name: Install ca-policy-egi-core
   become: yes
   yum:
-    state: updated
+    state: latest
     name:
       - ca-policy-egi-core
