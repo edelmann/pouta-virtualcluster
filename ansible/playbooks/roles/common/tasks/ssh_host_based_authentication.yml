@@ -28,6 +28,14 @@
   notify:
     - restart sshd
 
+- name: Set MaxAuthTries to 12 for sshd
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    line: "MaxAuthTries 12"
+    regexp: "^MaxAuthTries"
+    state: present
+  notify:
+    - restart sshd
 
 - name: Setup SSH host based authentication (client configuration file; enable `HostbasedAuthentication` option)
   action: lineinfile dest=/etc/ssh/ssh_config regexp='HostbasedAuthentication.*' line="HostbasedAuthentication yes"
