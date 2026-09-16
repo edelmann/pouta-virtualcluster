@@ -14,13 +14,13 @@ relations. It runs directly against OpenStack Python API.
 
 Currently poutacluster can provision:
 
-* A cluster suitable for ALICE computing on top of CentOS witth one frontend and N compute nodes
+* A cluster suitable for ALICE computing on top of AlmaLinux with one frontend and N compute nodes
 
   - frontend and compute nodes can have different images, flavors and keys
   - frontend has a public IP
   - there can be a volume for local persistent data
   - frontend has a separate shared volume, exported with NFS to the worker nodes from */mnt/shared_data*
-  - GridEngine for batch processing
+  - SLURM for batch processing
 
 How it works
 ============
@@ -48,9 +48,7 @@ Provisioning VMs for cluster goes roughly like this:
       + alice-node02
       + ...
 
-  - VMs are launched from the specified image with specified flavor. They are placed in an OpenStack server group with
-    anti-affinity policy to distribute them on separate hosts for better
-    fault tolerance. (the latter sentecne isn'nt true right now)
+  - VMs are launched from the specified image with specified flavor.
   - volumes are created or reused and attached
   - template security groups are created if these don't exist already
 
