@@ -160,15 +160,6 @@ Log in to the admin node, source the openrc.sh and start deploying the cluster:
 Some usefull stuff:
 -------------------
 
-Check uptime on all the hosts on cluster frontend::
-
-    pdsh -w mycluster-node[01-04] uptime
-
-Reboot the nodes::
-
-    sudo pdsh -w mycluster-node[01-04] reboot
-
-
 * If a node becomes unaccessible:
 
   1. Reboot the node::
@@ -177,11 +168,6 @@ Reboot the nodes::
        openstack server reboot <ID>
 
      and wait for a few minutes.
-
-     You may have to log in and (re-)start the sge_execd raemon::
-
-      sudo /etc/init.d/sge_execd status
-      sudo /etc/init.d/sge_execd start  # if down
 
   2. If rebooting didn't help remove the node and create a new one::
 
