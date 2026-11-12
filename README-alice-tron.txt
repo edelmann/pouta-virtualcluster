@@ -2,20 +2,51 @@
 Alice-tron lives on pouta.csc.fi (https://docs.csc.fi/cloud/pouta/). It consists of
 
 * One admin node called 'admin', 86.50.168.144
+
 * One cluster front-end node called alice-tron, 86.50.169.219
-* A number of worker nodes called alice-nodeXX , where XX is a two digit number
+
+* A number number of worker nodes called alice-nodeXX , where XX is a two digit number
+
+* Currently (2026-11-12) theres 11 worker nodes
 
 All nodes currently uses Almalinux.  The default user created by Pouta on all
 of the nodes is therefore also called 'almalinux'.
 
 
+Logging in
+----------
+
+* Log in to the admin node:
+ 
+  ssh almalinux@86.50.168.144
+
+
+* Log in to the cluster front-end or workr nodes:
+
+  1. Log in to the admin node 
+
+  2. Add the ssh key for the rest of the cluster
+ 
+     ssh-add
+
+     and give the passphrase
+
+
+   3.  log in
+
+     ssh alice-tron.hip.fi
+
+     or
+
+     ssh <ip-number of the node>
+
+
+  
 
 Adding new worker nodes
 -----------------------
 
-* To add a new worker node, log into the admin node:
-
-  ssh almalinux@86.50.168.144
+* Log in to the admin node
 
 * "Log in" to openstack/pouta.csc.fi by sourcing the file openrc.sh:
 
@@ -134,6 +165,8 @@ Records of all ALICE jobs that run on the cluster needs to be sent to NT1's SGAS
 Currently, this is being done using BART (https://github.com/sgas/bart): A cron
 jobs, defined in /etc/cron.d/bart runs once an hour, to collect data from
 slurm, and send it to sgas.
+
+Bart put logs into /var/log/bart-registration.log and /var/log/bart-logger.log
 
 Numbers can be viewed on https://count.ndgf.org:6143/sgas/view/ e.g. 
 
