@@ -179,3 +179,26 @@ https://count.ndgf.org:6143/sgas/view/machines/alice-tron.hip.fi
 
 *NOTE*: In the future (spring 2027 ?), this will be probably replaced by a
 system called AUDITOR
+
+
+
+ALICE & AliEn
+-------------
+
+* All ALICE & AliEn specific software is installed with CVMFS, under /cvmfs on
+  front-end and worker nodes. 
+
+* AliEn Services are run on the front-end node by a user called aliprod
+
+  * To start/stop/check the status of the services log in to the front-and and
+
+    sudo -u aliprod -i
+    /cvmfs/alice.cern.ch/scripts/vobox/jalien-vobox.sh stop ce monalisa
+    /cvmfs/alice.cern.ch/scripts/vobox/jalien-vobox.sh start ce monalisa
+    /cvmfs/alice.cern.ch/scripts/vobox/jalien-vobox.sh status ce monalisa
+ 
+    However, it's quite rare that you need to do that.
+
+  * aliprod also has a certificate, found in ~aliprod/.globus . It is nowadays
+    kept updated automatically, so you'll rarely need to worry about it.
+    
